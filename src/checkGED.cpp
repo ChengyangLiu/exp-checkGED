@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -15,50 +16,60 @@ void CheckGED::loadGEDs(const string& gedpath) {
 		bool isX = true;
 		while(getline(fin, line)) {
 			if (line.length() < 2) continue;
-			if (line[0] == '%' && line[1] == 'G') {
+			if (line[0] == '%' && line[1] == 'G') { //read gid and lid
 				string gid = line.substr(5, line.length() - 5);
+				//cout << "G:" << gid << endl;
 				getline(fin, line);
 				string lid = line.substr(5, line.length() - 5);
+				//cout << "L:" << lid << endl;
 				GED ged(boost::lexical_cast<long>(gid), lid);
 				_geds.emplace_back(ged);
+				_active.emplace_back(true);
 				cnt++;
-			} else if (line[0] == 'v') {
+			} else if (line[0] == 'v') { //read v
 				vector<string> details;
 				boost::split(details, line, boost::is_any_of("\t"));
+				//cout << "ID:" << details[1] << ",LABEL:" << details[2] << ",VALUE:" << details[3] << endl;
 				_geds[cnt-1].addV(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(details[2]), details[3]);
-			} else if (line[0] == 'e' && line[1] != 'q') {
+			} else if (line[0] == 'e' && line[1] != 'q') { //read e
 				vector<string> details;
 				boost::split(details, line, boost::is_any_of("\t"));
 				string elabel = details[2].substr(1, details[2].length()-2);
-				_geds[cnt-1].addE(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(details[2]), boost::lexical_cast<long>(details[3]));
-			} else if (line[0] == '%' && line[1] == 'X') {
+				//cout << "SRC:" << details[1] << ",LABEL:" << elabel << ",DST:" << details[3] << endl;
+				_geds[cnt-1].addE(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(elabel), boost::lexical_cast<long>(details[3]));
+			} else if (line[0] == '%' && line[1] == 'X') { //X?
 				isX = true;
-			} else if (line[0] == '%' && line[1] == 'Y') {
+			} else if (line[0] == '%' && line[1] == 'Y') { //Y?
 				isX = false;
-			} else if (line[0] == 'e' && line[1] == 'q') {
+			} else if (line[0] == 'e' && line[1] == 'q') { //read literals
 				vector<string> details;
 				boost::split(details, line, boost::is_any_of("\t"));
 				if (details[0][3] == 'l') {
 					if (isX) {
-						_geds[cnt-1].setX_type(EQ_LET);
 						_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[1]), details[2]);
 					} else {
-						_geds[cnt-1].setY_type(EQ_LET);
 						_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[1]), details[2]);
 					}
 				} else if (details[0][3] == 'v') {
 					if (isX) {
-						_geds[cnt-1].setX_type(EQ_VAR);
-						_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[1]), details[2]);
-						_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[3]), details[4]);
+						_geds[cnt-1].addX_var(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]), details[4]);
+
 					} else {
-						_geds[cnt-1].setY_type(EQ_VAR);
-						_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[1]), details[2]);
-						_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[3]), details[4]);
+						_geds[cnt-1].addY_var(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]), details[4]);
+					}
+				} else if (details[0][3] == 'i') {
+					string label = "-1";
+					if (isX) {
+						_geds[cnt-1].addX_id(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(details[3]));
+					} else {
+						_geds[cnt-1].addY_id(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(details[3]));
 					}
 				}
 			}
 		}
+	} catch(boost::bad_lexical_cast& e) {
+		cout << e.what() << endl;
+		exit(0);
 	} catch (exception& e) {
 		cout << e.what();
 		exit(0);
@@ -66,15 +77,29 @@ void CheckGED::loadGEDs(const string& gedpath) {
 }
 
 void CheckGED::printGEDs() {
-
+	cout << "Total:" << _geds.size() << "\n\n";
+	for (auto& ged:_geds) {
+		string str = "";
+		ged.toString(str);
+		cout << str << "\n";
+	}
 }
 
 void CheckGED::validation() {
 
 }
 
-void CheckGED::writeGEDs() {
-
+void CheckGED::writeValidatedGEDs(const string& gedpath) {
+	ofstream fout(gedpath + ".vali");
+	int cnt = _active.size();
+	for (int i = 0; i < cnt; i++) {
+		if (_active[i]) {
+			string res = "";
+			_geds[i].toString(res);
+			fout << res;
+		}
+	}
+	fout.close();
 }
 
 
@@ -91,17 +116,24 @@ int main(int argc, char **argv) {
 	}
 
 	CheckGED cg;
-	cg.loadGraph(filename);
+	//cg.loadGraph(filename);
 	cg.loadGEDs(gedpath);
 
+	vector<GED>& ged = cg.geds();
+	for (auto& g:ged) {
+		g.printNeighbors();
+	}
+
+
+
 	//test
-	cg.printGraph();
-	cg.printGEDs();
+	//cg.printGraph();
+	//cg.printGEDs();
 
   //validate
-	cg.validation();
+	//cg.validation();
 	//write file
-	cg.writeGEDs();
+	//cg.writeValidatedGEDs(gedpath);
 
 	return 1;
 }

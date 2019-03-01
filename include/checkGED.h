@@ -14,10 +14,14 @@ class CheckGED {
 
 		void loadGraph(const string& filename) {_graph.loadGraph(filename);}
 		void loadGEDs(const string& gedpath);
-		void printGraph() {_graph.printGraph();}
+		void printGraph() {
+      string res = "";
+      _graph.graphString(res);
+      cout << res;
+    }
 		void printGEDs();
 		void validation();
-		void writeGEDs();
+		void writeValidatedGEDs(const string& gedpath);
 
 	private:
 		Graph _graph;

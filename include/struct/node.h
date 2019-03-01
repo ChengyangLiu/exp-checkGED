@@ -18,6 +18,9 @@ class Node {
 		void addNeighbor(Vertex* neighbor, long elabel) {
 			_neighbors.emplace_back(neighbor);
 			_elabels.emplace_back(elabel);
+      for (auto v:_neighbors) {
+        cout << "T3: " << _vertex.id() << "," << v->id() << "\n";
+      }
 		}
 
 		inline Vertex& v() { return _vertex;}

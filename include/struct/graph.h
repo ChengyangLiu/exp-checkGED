@@ -3,6 +3,8 @@
 #include <map>
 #include <exception>
 
+#include <boost/lexical_cast.hpp>
+
 #include "./node.h"
 
 using namespace std;
@@ -30,7 +32,6 @@ class Graph {
           _nodes.emplace_back(node);
           _vid_map[src] = cnt++;
         }
-        _node_num = _nodes.size();
         ifstream fin_e(filename + ".e");
         // read its neighbors in
         while(getline(fin_e, line)) {
@@ -46,24 +47,33 @@ class Graph {
     }
 
     /* print the graph */
-    void printGraph() {
-      for(auto& node:_nodes) {
-        Vertex& vertex = node.v();
-        vector<Vertex*>& neighbors = node.neighbors();
-        vector<long>& elabels = node.elabels();
-        cout << vertex.id() << "," << vertex.label() << "," << vertex.value();
-        int len = neighbors.size();
-        for(int i = 0; i < len; i++) {
-          cout << "," << neighbors[i]->id() << "," << elabels[i];
+    void graphString(string& str) {
+      try {
+        for(auto& node:_nodes) {
+          Vertex& vertex = node.v();
+          string value = vertex.value();
+          str = str + "v\t" + boost::lexical_cast<string>(vertex.id()) + "\t"
+          + boost::lexical_cast<string>(vertex.label()) + "\t" + vertex.value() + "\n";
         }
-        cout << "\n";
+        for(auto& node:_nodes) {
+          Vertex& vertex = node.v();
+          vector<Vertex*>& neighbors = node.neighbors();
+          vector<long>& elabels = node.elabels();
+          int len = neighbors.size();
+          for(int i = 0; i < len; i++) {
+            str = str + "e\t" + boost::lexical_cast<string>(vertex.id()) + "\t{"
+            + boost::lexical_cast<string>(elabels[i]) + "}\t" + boost::lexical_cast<string>(neighbors[i]->id()) + "\n";
+          }
+        }
+      } catch(boost::bad_lexical_cast& e) {
+        cout << e.what() << endl;
+        exit(0);
       }
     }
 
   private:
 		inline Node& node(long vid) { return _nodes[_vid_map[vid]];}
 
-		long _node_num; //as max node id
 		vector<Node> _nodes; //nodes of graph
 		map<long, long> _vid_map; //(original VID, its position)
 };
