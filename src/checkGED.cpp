@@ -86,7 +86,11 @@ void CheckGED::printGEDs() {
 }
 
 void CheckGED::validation() {
-
+	for (int i = 0; i < _geds.size(); i++) {
+		if(!_geds[i].existGED()) {
+			_active[i] = false;
+		}
+	}
 }
 
 void CheckGED::writeValidatedGEDs(const string& gedpath) {

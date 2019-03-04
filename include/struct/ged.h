@@ -152,6 +152,39 @@ class GED {
       }
     }
 
+    bool existGED(vector<Node>& allNodes) {
+      vector<Node> p_stack = _nodes;
+      vector<Node> g_stack;
+      vector<Node> g_ans;
+  		for (auto& p_node:p_stack) {
+  			long p_label = p_node.v().label();
+  			for (auto& g_node:allNodes) { // find node with same label in graph
+  				long g_label = g_node.v().label();
+  				if (p_label != g_label) continue; // if not same, just continue
+          // if same, compare its neighbors and elabels
+          g_stack.emplace_back(g_node);
+          vector<long>& p_neighbors = p_node.neighbors();
+  				vector<long>& p_elabels = p_node.elabels();
+          vector<long>& g_neighbors = g_node.neighbors();
+  				vector<long>& g_elabels = g_node.elabels();
+  				for (int i = 0; i < p_size; i++) {
+            long p_elabel = p_elabels[i];
+            long p_n_label = GED::node(p_neighbors[i]).v().label();
+            for (int j = 0; j < g_neighbors.size(); j++) {
+              long g_elabel = g_elabels[i];
+              long g_n_label = GED::node(g_neighbors[i]).v().label();
+              if (p_elabel == g_elabel && p_n_label == g_n_label) {
+                // find same structure in graph, count and search next neighbor.
+                g_stack.emplace_back(g_node);
+              }
+            }
+  				}
+  			}
+  		}
+      // this pattern exists in graph.
+      // check its literals
+    }
+
     void toString(string& str) {
       str = str + "%Gid:" + boost::lexical_cast<string>(gid()) + "\n";
       str = str + "%Lid:" + lid() + "\n";

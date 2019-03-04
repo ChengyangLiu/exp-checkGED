@@ -72,6 +72,8 @@ class Graph {
       }
     }
 
+    vector<Node>& allNodes() { return _nodes;}
+
   private:
 		inline Node& node(long vid) { return _nodes[_vid_map[vid]];}
 
