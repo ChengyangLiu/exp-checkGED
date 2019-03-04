@@ -38,7 +38,7 @@ class Graph {
           stringstream ss(line);
           ss >> src >> label >> dst;
           Node& node = Graph::node(src);
-          node.addNeighbor(&(Graph::node(dst).v()), label);
+          node.addNeighbor(dst, label);
         }
       } catch (exception& e) {
         cout << e.what();
@@ -57,12 +57,13 @@ class Graph {
         }
         for(auto& node:_nodes) {
           Vertex& vertex = node.v();
-          vector<Vertex*>& neighbors = node.neighbors();
+          vector<long>& neighbors = node.neighbors();
           vector<long>& elabels = node.elabels();
           int len = neighbors.size();
           for(int i = 0; i < len; i++) {
+            Vertex& dst = Graph::node(neighbors[i]).v();
             str = str + "e\t" + boost::lexical_cast<string>(vertex.id()) + "\t{"
-            + boost::lexical_cast<string>(elabels[i]) + "}\t" + boost::lexical_cast<string>(neighbors[i]->id()) + "\n";
+            + boost::lexical_cast<string>(elabels[i]) + "}\t" + boost::lexical_cast<string>(dst.id()) + "\n";
           }
         }
       } catch(boost::bad_lexical_cast& e) {

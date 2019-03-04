@@ -25,7 +25,7 @@ void CheckGED::loadGEDs(const string& gedpath) {
 				GED ged(boost::lexical_cast<long>(gid), lid);
 				_geds.emplace_back(ged);
 				_active.emplace_back(true);
-				cnt++;
+				++cnt;
 			} else if (line[0] == 'v') { //read v
 				vector<string> details;
 				boost::split(details, line, boost::is_any_of("\t"));
@@ -116,19 +116,12 @@ int main(int argc, char **argv) {
 	}
 
 	CheckGED cg;
-	//cg.loadGraph(filename);
+	cg.loadGraph(filename);
 	cg.loadGEDs(gedpath);
 
-	vector<GED>& ged = cg.geds();
-	for (auto& g:ged) {
-		g.printNeighbors();
-	}
-
-
-
 	//test
-	//cg.printGraph();
-	//cg.printGEDs();
+	cg.printGraph();
+	cg.printGEDs();
 
   //validate
 	//cg.validation();
