@@ -87,10 +87,18 @@ void CheckGED::printGEDs() {
 
 void CheckGED::validation() {
 	for (int i = 0; i < _geds.size(); i++) {
-		if(!_geds[i].existGED()) {
+		if(!_geds[i].existGED(_graph)) {
 			_active[i] = false;
 		}
 	}
+	for (int i = 0; i < _active.size(); i++) {
+		if (_active[i]) {
+			cout << "1\t";
+		} else {
+			cout << "0\t";
+		}
+	}
+	cout << "\n";
 }
 
 void CheckGED::writeValidatedGEDs(const string& gedpath) {
@@ -128,7 +136,7 @@ int main(int argc, char **argv) {
 	cg.printGEDs();
 
   //validate
-	//cg.validation();
+	cg.validation();
 	//write file
 	//cg.writeValidatedGEDs(gedpath);
 

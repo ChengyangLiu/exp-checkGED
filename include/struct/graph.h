@@ -76,6 +76,7 @@ class Graph {
 
   private:
 		inline Node& node(long vid) { return _nodes[_vid_map[vid]];}
+    inline int pos(long vid) { return _vid_map[vid];}
 
 		vector<Node> _nodes; //nodes of graph
 		map<long, long> _vid_map; //(original VID, its position)

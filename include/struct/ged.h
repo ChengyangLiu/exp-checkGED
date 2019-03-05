@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <stack>
 
 #include "./graph.h"
 #include "../util.h"
@@ -152,37 +153,102 @@ class GED {
       }
     }
 
-    bool existGED(vector<Node>& allNodes) {
-      vector<Node> p_stack = _nodes;
-      vector<Node> g_stack;
-      vector<Node> g_ans;
-  		for (auto& p_node:p_stack) {
-  			long p_label = p_node.v().label();
-  			for (auto& g_node:allNodes) { // find node with same label in graph
-  				long g_label = g_node.v().label();
-  				if (p_label != g_label) continue; // if not same, just continue
-          // if same, compare its neighbors and elabels
-          g_stack.emplace_back(g_node);
-          vector<long>& p_neighbors = p_node.neighbors();
-  				vector<long>& p_elabels = p_node.elabels();
-          vector<long>& g_neighbors = g_node.neighbors();
-  				vector<long>& g_elabels = g_node.elabels();
-  				for (int i = 0; i < p_size; i++) {
-            long p_elabel = p_elabels[i];
-            long p_n_label = GED::node(p_neighbors[i]).v().label();
-            for (int j = 0; j < g_neighbors.size(); j++) {
-              long g_elabel = g_elabels[i];
-              long g_n_label = GED::node(g_neighbors[i]).v().label();
-              if (p_elabel == g_elabel && p_n_label == g_n_label) {
-                // find same structure in graph, count and search next neighbor.
-                g_stack.emplace_back(g_node);
+    bool existGED(Graph& g) {
+      bool isExist = false;
+      vector<vector<Node>> g_cans;
+      vector<Node>& g_allNodes = g.allNodes();
+      vector<Node>& p_nodes = _nodes;
+      int cnt = p_nodes.size();
+      for (auto& p_node:p_nodes) {
+        vector<Node> g_can;
+        for (auto& g_node:g_allNodes) {
+          if (g_node.v().label() == p_node.v().label()) {
+            g_can.emplace_back(g_node);
+          }
+        }
+        g_cans.emplace_back(g_can);
+      }
+      vector<int> layer; //record position in graph pattern
+      int flag = 0;
+      for (int i = 0; i < cnt; i++) {
+        int can_num = g_cans[i].size() - 1;
+        layer.emplace_back(can_num);
+        flag += can_num;
+      }
+      vector<int> old = layer;
+      while (true) {
+        bool isP = true;
+        for (int i = 0; i < p_nodes.size(); i++) {
+          if (p_nodes[i].neighbors().size() == 0) continue;
+          // check edge relation
+          vector<Node>& g_nodes = g_cans[i];
+          vector<long>& p_neighbors = p_nodes[i].neighbors();
+          vector<long>& g_neighbors = g_nodes[layer[i]].neighbors();
+          if (p_neighbors.size() != g_neighbors.size()) {
+            isP = false;
+            break;
+          }
+          vector<long>& p_elabels = p_nodes[i].elabels();
+          vector<long>& g_elabels = g_nodes[layer[i]].elabels();
+          for(int j = 0; j < p_neighbors.size(); j++) {
+            Vertex& p_dst = GED::node(p_neighbors[j]).v();
+            Vertex& g_dst_check = GED::node(g_neighbors[j]).v();
+            int k = 0;
+            for (; k < p_nodes.size(); k++) {
+              if (p_nodes[k].v().id() == p_dst.id()) break;
+            }
+            Vertex& g_dst = g_cans[k][layer[k]].v();
+            if (g_dst.id() != g_dst_check.id()) {
+              isP = false;
+              break;
+            }
+          }
+        }
+        if (isP) {
+          // check literal
+          isExist = true;
+          map<long, string>::iterator it = _x_matches.begin();
+          for (auto& type:_x_type) {
+            map<long, string> check_info;
+            if (type == EQ_LET) {
+              long vid = it->first;
+              string value = (it++)->second;
+              check_info[vid] = value;
+            } else if (type == EQ_VAR) {
+              long a_id = it->first;
+              string a_value = (it++)->second;
+              check_info[a_id] = a_value;
+              long b_id = it->first;
+              string b_value = (it++)->second;
+              check_info[b_id] = b_value;
+            }
+            for (map<long, string>::iterator it = check_info.begin(); it != check_info.end(); it++) {
+              int pos = GED::pos(it->first);
+              Vertex& g_v_check = g_cans[pos][layer[pos]].v();
+              if (it->second != g_v_check.value()) {
+                isExist = false;
+                break;
               }
             }
-  				}
-  			}
-  		}
-      // this pattern exists in graph.
-      // check its literals
+            if (!isExist) break;
+          }
+        }
+        // update candidates
+        for (int i = 0; i < cnt; i++) {
+          flag += layer[i];
+        }
+        if (flag == 0) break;
+        int total = layer.size();
+        for (int i = 0; i < layer.size(); i++) {
+          if (layer[i] == 0) {
+            layer[i] = old[i];
+          } else {
+            layer[i]--;
+            break;
+          }
+        }
+      }
+      return isExist;
     }
 
     void toString(string& str) {
@@ -194,6 +260,7 @@ class GED {
 
   private:
     inline Node& node(long vid) { return _nodes[_id_map[vid]];}
+    inline int pos(long vid) { return _id_map[vid];}
 
     long _gid;
     string _lid;
