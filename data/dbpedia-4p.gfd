@@ -1,0 +1,15 @@
+##############
+%GID:62
+%LID#1#62-2-Peripatetic_school#1#1#6
+#Pattern
+v	0	1	ANY
+v	2	1	ANY
+v	1	1	ANY
+e	0	{25}	1
+e	0	{25}	2
+#Condition
+%X
+eq-let	1	Aristotelianism
+%Y
+eq-let	2	Peripatetic_school
+##############

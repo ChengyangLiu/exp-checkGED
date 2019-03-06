@@ -91,10 +91,11 @@
 90	1	List_of_indigenous_peoples
 91	1	Historical_anthropology
 92	1	ASCII
-93	1	Windows-1252
+93	1	Windows_1252
 94	1	Extended_ASCII
 95	1	Basic_Latin_(Unicode_block)
 96	1	Atomic_number
 97	1	List_of_elements
 98	13	Alchemy
 99	0	Metallurgy
+100	1	The_Indian_subcontinent

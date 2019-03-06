@@ -189,7 +189,7 @@ class GED {
 
       int t_cnt = 0;
       while (true) {
-        //cout << "T_num:" << t_cnt++ << "\n";
+        cout << "T_num:" << t_cnt++ << "\n";
         bool isP = true;
         for (int i = 0; i < p_nodes.size(); i++) {
           if (p_nodes[i].neighbors().size() == 0) {
@@ -208,15 +208,17 @@ class GED {
             Node& p_dst_node = GED::node(p_neighbors[j]);
             int pos = GED::pos(p_dst_node);
             Node& g_dst_node = g_cans[pos][layer[pos]];
-            /*cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
+            cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
             cout << "G:" << g_dst_node.v().id() << "," << g_dst_node.v().label() << ",{";
             vector<long> g_test;
             g_node.elabel(g_dst_node, g_test);
             for (auto tt:g_test) {
               cout << tt << ",";
             }
-            cout << "}\n";*/
-            if (p_dst_node.v().label() != g_dst_node.v().label()) { //judge whether neighbor's label is equal
+            cout << "}\n";
+            if (g_node.v().id() == g_dst_node.v().id() || p_dst_node.v().label() != g_dst_node.v().label()) {
+              //remove self circle
+              //judge whether neighbor's label is equal
               isP = false;
               break;
             } else { //judge whether neighbor's elabel is equal
@@ -234,21 +236,28 @@ class GED {
             }
           }
         }
-        bool isL = false;
+        bool isX = true;
+        bool isY = true;
         if (isP) {
-          //cout << "Pattern is Correct!\n";
+          cout << "Pattern is Correct!\n";
           // check literal
-          isL = true;
-          for (int i = 0; i < 2; i++) {
-            vector<GED_TYPE>& types = (i == 0)?_x_type:_y_type;
-            map<long, string>::iterator it = (i == 0)?_x_matches.begin():_y_matches.begin();
+          vector<long> x_g_id; // TODO: y literal is not the same vertex with x literal
+          for (int j = 0; j < 2; j++) {
+            vector<GED_TYPE>& types = (j == 0) ? _x_type : _y_type;
+            map<long, string>::iterator it = (j == 0) ? _x_matches.begin() : _y_matches.begin();
             for (auto& type:types) {
               if (type == EQ_LET) {
                 long vid = it->first;
                 string value = (it++)->second;
                 int pos = GED::pos(vid);
-                if (pos == -1 || value != g_cans[pos][layer[pos]].v().value()) {
-                  isL = false;
+                if (pos == -1) { return false;}
+                cout << "value:" << value << "," << g_cans[pos][layer[pos]].v().value() << "\n";
+                if (value != g_cans[pos][layer[pos]].v().value()) {
+                  if (j == 0) {
+                    isX = false;
+                  } else {
+                    isY = false;
+                  }
                   break;
                 }
               } else if (type == EQ_VAR) {
@@ -259,22 +268,49 @@ class GED {
                 if (a_elabel == -1) { //elabel = -1, compare their name
                   int a_pos = GED::pos(a_id);
                   int b_pos = GED::pos(b_id);
-                  if (a_pos == -1 || b_pos == -1 || g_cans[a_pos][layer[a_pos]].v().value() != g_cans[b_pos][layer[b_pos]].v().value()) {
-                    isL = false;
+                  if (a_pos == -1 || b_pos == -1) { return false;}
+                  //cout << "value:" << g_cans[a_pos][layer[a_pos]].v().value() << "," << g_cans[b_pos][layer[b_pos]].v().value() << "\n";
+                  if (g_cans[a_pos][layer[a_pos]].v().value() != g_cans[b_pos][layer[b_pos]].v().value()) {
+                    if (j == 0) {
+                      isX = false;
+                    } else {
+                      isY = false;
+                    }
                     break;
                   }
-                } else { //compare their neighbor with given elabel
-
+                } else { //compare their neighbors with given elabels
+                  int a_pos = GED::pos(a_id);
+                  int b_pos = GED::pos(b_id);
+                  if (a_pos == -1 || b_pos == -1) { return false;}
+                  vector<long> a_dst_id, b_dst_id;
+                  for (int k = 0; k < 2; k++) { //find all neighbors with given elabel
+                    vector<long>& dst_id = (k == 0) ? a_dst_id : b_dst_id;
+                    Node& node = (k == 0) ? g_cans[a_pos][layer[a_pos]] : g_cans[b_pos][layer[b_pos]];
+                    long given_label = (k == 0) ? a_elabel : b_elabel;
+                    vector<long>& neighbors = node.neighbors();
+                    vector<long>& elabels = node.elabels();
+                    for (int t = 0; t < elabels.size(); t++) {
+                      if (elabels[t] == given_label) { dst_id.emplace_back(neighbors[t]);}
+                    }
+                  }
+                  if (interEmpty(a_dst_id, b_dst_id)) { //if their neighbors' ids are all different, pruning
+                    if (j == 0) {
+                      isX = false;
+                    } else {
+                      isY = false;
+                    }
+                    break;
+                  }
                 }
               }
             }
-            if (!isL) break;
+            cout << isX << "," << isY << "\n";
+            if (!isX) break;
           }
         }
 
-        if (isL) {
-          //cout << "Literal is Correct!\n";
-          return true;
+        if (isX && !isY) {
+          return false;
         }
         // update candidates
         int flag = 0;
@@ -292,7 +328,7 @@ class GED {
           }
         }
       }
-      return false;
+      return true;
     }
 
     void toString(string& str) {

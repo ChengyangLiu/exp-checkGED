@@ -114,6 +114,7 @@ void CheckGED::validation() {
 		} else {
 			cout << "0\t";
 		}
+		if ((i+1) % 5 == 0) cout << "\n";
 	}
 	cout << "\n";
 }
@@ -149,8 +150,8 @@ int main(int argc, char **argv) {
 	cg.loadGEDs(gedpath);
 
 	//print info
-	cg.printGraph();
-	cg.printGEDs();
+	//cg.printGraph();
+	//cg.printGEDs();
 
   //validate
 	cg.validation();
