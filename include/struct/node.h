@@ -30,6 +30,16 @@ class Node {
 		inline vector<long>& neighbors() {return _neighbors;}
 		inline vector<long>& elabels() {return _elabels;}
 
+    /* given neighbor, obtain its elabels */
+    void elabel(Node& node, vector<long>& elabels) {
+      long id = node.v().id();
+      for (int i = 0; i < _neighbors.size(); i++) {
+        if (id == _neighbors[i]) {
+          elabels.emplace_back(_elabels[i]);
+        }
+      }
+    }
+
 	private:
 		Vertex _vertex; //source
 		vector<long> _neighbors; //destinations

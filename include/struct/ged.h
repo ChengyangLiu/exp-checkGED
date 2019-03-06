@@ -65,17 +65,15 @@ class GED {
       _y_matches[b_id] = b_value;
     }
 
-    inline void addX_id(long a_id, long b_id) {
-      string label = "-1";
+    inline void addX_id(long a_id, string& value, long b_id) {
       _x_type.emplace_back(EQ_ID);
-      _x_matches[a_id] = label;
-      _x_matches[b_id] = label;
+      _x_matches[a_id] = value;
+      _x_matches[b_id] = value;
     }
-    inline void addY_id(long a_id, long b_id) {
-      string label = "-1";
+    inline void addY_id(long a_id, string& value, long b_id) {
       _y_type.emplace_back(EQ_ID);
-      _y_matches[a_id] = label;
-      _y_matches[b_id] = label;
+      _y_matches[a_id] = value;
+      _y_matches[b_id] = value;
     }
 
     inline vector<Node>& pattern() {return _nodes;}
@@ -154,11 +152,12 @@ class GED {
     }
 
     bool existGED(Graph& g) {
-      bool isExist = false;
       vector<vector<Node>> g_cans;
       vector<Node>& g_allNodes = g.allNodes();
       vector<Node>& p_nodes = _nodes;
       int cnt = p_nodes.size();
+      // obetain all possible candidates in graph
+      // CAUTION: value of vertex is not considered. (all are ANY)
       for (auto& p_node:p_nodes) {
         vector<Node> g_can;
         for (auto& g_node:g_allNodes) {
@@ -168,72 +167,112 @@ class GED {
         }
         g_cans.emplace_back(g_can);
       }
+      ///test
+      /*for (auto& g_can:g_cans) {
+        for (auto& g:g_can) {
+          cout << g.v().id() << "," << g.v().label() << "," << g.v().value() << "\t";
+        }
+        cout << "\n";
+      }*/
+
       vector<int> layer; //record position in graph pattern
-      int flag = 0;
       for (int i = 0; i < cnt; i++) {
         int can_num = g_cans[i].size() - 1;
         layer.emplace_back(can_num);
-        flag += can_num;
+        //cout << can_num << "\t";
       }
+      //cout << "\n";
       vector<int> old = layer;
+
+      int t_cnt = 0;
       while (true) {
+        //cout << "T_num:" << t_cnt++ << "\n";
         bool isP = true;
         for (int i = 0; i < p_nodes.size(); i++) {
-          if (p_nodes[i].neighbors().size() == 0) continue;
+          if (p_nodes[i].neighbors().size() == 0) {
+            continue;
+          }
           // check edge relation
-          vector<Node>& g_nodes = g_cans[i];
           vector<long>& p_neighbors = p_nodes[i].neighbors();
-          vector<long>& g_neighbors = g_nodes[layer[i]].neighbors();
-          if (p_neighbors.size() != g_neighbors.size()) {
+          Node& g_node = g_cans[i][layer[i]];
+          if (p_neighbors.size() > g_node.neighbors().size()) {
+            //if num of p_node's neighbors > num of g_node's neighbors, pruning
             isP = false;
             break;
           }
           vector<long>& p_elabels = p_nodes[i].elabels();
-          vector<long>& g_elabels = g_nodes[layer[i]].elabels();
           for(int j = 0; j < p_neighbors.size(); j++) {
-            Vertex& p_dst = GED::node(p_neighbors[j]).v();
-            Vertex& g_dst_check = GED::node(g_neighbors[j]).v();
-            int k = 0;
-            for (; k < p_nodes.size(); k++) {
-              if (p_nodes[k].v().id() == p_dst.id()) break;
+            Node& p_dst_node = GED::node(p_neighbors[j]);
+            int pos = GED::pos(p_dst_node);
+            Node& g_dst_node = g_cans[pos][layer[pos]];
+            /*cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
+            cout << "G:" << g_dst_node.v().id() << "," << g_dst_node.v().label() << ",{";
+            vector<long> g_test;
+            g_node.elabel(g_dst_node, g_test);
+            for (auto tt:g_test) {
+              cout << tt << ",";
             }
-            Vertex& g_dst = g_cans[k][layer[k]].v();
-            if (g_dst.id() != g_dst_check.id()) {
+            cout << "}\n";*/
+            if (p_dst_node.v().label() != g_dst_node.v().label()) { //judge whether neighbor's label is equal
               isP = false;
               break;
-            }
-          }
-        }
-        if (isP) {
-          // check literal
-          isExist = true;
-          map<long, string>::iterator it = _x_matches.begin();
-          for (auto& type:_x_type) {
-            map<long, string> check_info;
-            if (type == EQ_LET) {
-              long vid = it->first;
-              string value = (it++)->second;
-              check_info[vid] = value;
-            } else if (type == EQ_VAR) {
-              long a_id = it->first;
-              string a_value = (it++)->second;
-              check_info[a_id] = a_value;
-              long b_id = it->first;
-              string b_value = (it++)->second;
-              check_info[b_id] = b_value;
-            }
-            for (map<long, string>::iterator it = check_info.begin(); it != check_info.end(); it++) {
-              int pos = GED::pos(it->first);
-              Vertex& g_v_check = g_cans[pos][layer[pos]].v();
-              if (it->second != g_v_check.value()) {
-                isExist = false;
+            } else { //judge whether neighbor's elabel is equal
+              vector<long> g_elabels;
+              g_node.elabel(g_dst_node, g_elabels);
+              int k = 0;
+              int label_num = g_elabels.size();
+              for (; k < label_num; k++) {
+                if (g_elabels[k] == p_elabels[j]) break;
+              }
+              if (k == label_num) {
+                isP = false;
                 break;
               }
             }
-            if (!isExist) break;
           }
         }
+        bool isL = false;
+        if (isP) {
+          //cout << "Pattern is Correct!\n";
+          // check literal
+          isL = true;
+          for (int i = 0; i < 2; i++) {
+            vector<GED_TYPE>& types = (i == 0)?_x_type:_y_type;
+            map<long, string>::iterator it = (i == 0)?_x_matches.begin():_y_matches.begin();
+            for (auto& type:types) {
+              map<long, string> check_info;
+              if (type == EQ_LET) {
+                long vid = it->first;
+                string value = (it++)->second;
+                check_info[vid] = value;
+              } else if (type == EQ_VAR) {
+                long a_id = it->first;
+                string a_value = (it++)->second;
+                check_info[a_id] = a_value;
+                long b_id = it->first;
+                string b_value = (it++)->second;
+                check_info[b_id] = b_value;
+              }
+              for (map<long, string>::iterator it = check_info.begin(); it != check_info.end(); it++) {
+                int pos = GED::pos(it->first);
+                Vertex& g_v_check = g_cans[pos][layer[pos]].v();
+                if (it->second != g_v_check.value()) {
+                  isL = false;
+                  break;
+                }
+              }
+              if (!isL) break;
+            }
+            if (!isL) break;
+          }
+        }
+
+        if (isL) {
+          //cout << "Literal is Correct!\n";
+          return true;
+        }
         // update candidates
+        int flag = 0;
         for (int i = 0; i < cnt; i++) {
           flag += layer[i];
         }
@@ -248,7 +287,7 @@ class GED {
           }
         }
       }
-      return isExist;
+      return false;
     }
 
     void toString(string& str) {
@@ -260,7 +299,17 @@ class GED {
 
   private:
     inline Node& node(long vid) { return _nodes[_id_map[vid]];}
+
     inline int pos(long vid) { return _id_map[vid];}
+
+    /* given node, return its position */
+    int pos(Node& node) {
+      long id = node.v().id();
+      for (int i = 0; i < _nodes.size(); i++) {
+        if (_nodes[i].v().id() == id) return i;
+      }
+      return -1;
+    }
 
     long _gid;
     string _lid;

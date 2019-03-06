@@ -45,24 +45,33 @@ void CheckGED::loadGEDs(const string& gedpath) {
 				vector<string> details;
 				boost::split(details, line, boost::is_any_of("\t"));
 				if (details[0][3] == 'l') {
+					//format1: eq-let vid key value
+					//format2: eq-let vid value
+					//Only read in its vid and value because the format of graph is RDF which only has one key-value.
 					if (isX) {
-						_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[1]), details[2]);
+						if (details.size() == 4) {
+							_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[1]), details[3]);
+						} else {
+							_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[1]), details[2]);
+						}
 					} else {
-						_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[1]), details[2]);
+						if (details.size() == 4) {
+							_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[1]), details[3]);
+						} else {
+							_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[1]), details[2]);
+						}
 					}
 				} else if (details[0][3] == 'v') {
 					if (isX) {
 						_geds[cnt-1].addX_var(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]), details[4]);
-
 					} else {
 						_geds[cnt-1].addY_var(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]), details[4]);
 					}
 				} else if (details[0][3] == 'i') {
-					string label = "-1";
 					if (isX) {
-						_geds[cnt-1].addX_id(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(details[3]));
+						_geds[cnt-1].addX_id(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]));
 					} else {
-						_geds[cnt-1].addY_id(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(details[3]));
+						_geds[cnt-1].addY_id(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]));
 					}
 				}
 			}
@@ -87,10 +96,15 @@ void CheckGED::printGEDs() {
 
 void CheckGED::validation() {
 	for (int i = 0; i < _geds.size(); i++) {
+		cout << "Checking NO." << (i+1) << " GED";
 		if(!_geds[i].existGED(_graph)) {
 			_active[i] = false;
+			cout << "\t0\n";
+		} else {
+			cout << "\t1\n";
 		}
 	}
+	cout << "\nThe results:\n";
 	for (int i = 0; i < _active.size(); i++) {
 		if (_active[i]) {
 			cout << "1\t";
@@ -131,14 +145,14 @@ int main(int argc, char **argv) {
 	cg.loadGraph(filename);
 	cg.loadGEDs(gedpath);
 
-	//test
+	//print info
 	cg.printGraph();
-	cg.printGEDs();
+	//cg.printGEDs();
 
   //validate
 	cg.validation();
 	//write file
-	//cg.writeValidatedGEDs(gedpath);
+	cg.writeValidatedGEDs(gedpath);
 
 	return 1;
 }
