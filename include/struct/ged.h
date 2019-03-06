@@ -39,10 +39,13 @@ class GED {
       _id_map[id] = _cnt++;
     }
 
-    void addE(long src, long label, long dst) {
+    bool addE(long src, long label, long dst) {
+      if (!GED::nodeExist(src) || !GED::nodeExist(dst)) {
+        return false;
+      }
       Node& node = GED::node(src);
-      Node& dnode = GED::node(dst);
       node.addNeighbor(dst, label);
+      return true;
     }
 
     inline void addX_let(long id, string& value) {
@@ -240,28 +243,30 @@ class GED {
             vector<GED_TYPE>& types = (i == 0)?_x_type:_y_type;
             map<long, string>::iterator it = (i == 0)?_x_matches.begin():_y_matches.begin();
             for (auto& type:types) {
-              map<long, string> check_info;
               if (type == EQ_LET) {
                 long vid = it->first;
                 string value = (it++)->second;
-                check_info[vid] = value;
-              } else if (type == EQ_VAR) {
-                long a_id = it->first;
-                string a_value = (it++)->second;
-                check_info[a_id] = a_value;
-                long b_id = it->first;
-                string b_value = (it++)->second;
-                check_info[b_id] = b_value;
-              }
-              for (map<long, string>::iterator it = check_info.begin(); it != check_info.end(); it++) {
-                int pos = GED::pos(it->first);
-                Vertex& g_v_check = g_cans[pos][layer[pos]].v();
-                if (it->second != g_v_check.value()) {
+                int pos = GED::pos(vid);
+                if (pos == -1 || value != g_cans[pos][layer[pos]].v().value()) {
                   isL = false;
                   break;
                 }
+              } else if (type == EQ_VAR) {
+                long a_id = it->first;
+                long a_elabel = boost::lexical_cast<long>((it++)->second);
+                long b_id = it->first;
+                long b_elabel = boost::lexical_cast<long>((it++)->second);
+                if (a_elabel == -1) { //elabel = -1, compare their name
+                  int a_pos = GED::pos(a_id);
+                  int b_pos = GED::pos(b_id);
+                  if (a_pos == -1 || b_pos == -1 || g_cans[a_pos][layer[a_pos]].v().value() != g_cans[b_pos][layer[b_pos]].v().value()) {
+                    isL = false;
+                    break;
+                  }
+                } else { //compare their neighbor with given elabel
+
+                }
               }
-              if (!isL) break;
             }
             if (!isL) break;
           }
@@ -299,8 +304,10 @@ class GED {
 
   private:
     inline Node& node(long vid) { return _nodes[_id_map[vid]];}
-
-    inline int pos(long vid) { return _id_map[vid];}
+    /* check exist */
+    inline bool nodeExist(long vid) { return _id_map.find(vid) != _id_map.end() ? true : false;}
+    /* given vid, return its position */
+    inline int pos(long vid) { return _id_map.find(vid) != _id_map.end() ? _id_map[vid] : -1;}
 
     /* given node, return its position */
     int pos(Node& node) {

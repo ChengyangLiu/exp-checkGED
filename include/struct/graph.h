@@ -34,9 +34,19 @@ class Graph {
         }
         ifstream fin_e(filename + ".e");
         // read its neighbors in
+        int line_cnt = 0;
         while(getline(fin_e, line)) {
           stringstream ss(line);
           ss >> src >> label >> dst;
+          line_cnt++;
+          if (!Graph::nodeExist(src)) {
+            cout << "Vertex ID: " << src << " does not exist, Line " << line_cnt << " in File " << filename << ".e\n";
+            exit(0);
+          }
+          if (!Graph::nodeExist(dst)) {
+            cout << "Vertex ID: " << dst << " does not exist, Line " << line_cnt << " in File " << filename << ".e\n";
+            exit(0);
+          }
           Node& node = Graph::node(src);
           node.addNeighbor(dst, label);
         }
@@ -75,8 +85,12 @@ class Graph {
     vector<Node>& allNodes() { return _nodes;}
 
   private:
+    /* only for existed id */
 		inline Node& node(long vid) { return _nodes[_vid_map[vid]];}
-    inline int pos(long vid) { return _vid_map[vid];}
+    /* check exist */
+    inline bool nodeExist(long vid) { return _vid_map.find(vid) != _vid_map.end() ? true : false;}
+    /* given vid, return its position */
+    inline int pos(long vid) { return _vid_map.find(vid) != _vid_map.end() ? _vid_map[vid] : -1;}
 
 		vector<Node> _nodes; //nodes of graph
 		map<long, long> _vid_map; //(original VID, its position)

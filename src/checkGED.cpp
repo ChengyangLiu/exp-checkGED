@@ -36,7 +36,10 @@ void CheckGED::loadGEDs(const string& gedpath) {
 				boost::split(details, line, boost::is_any_of("\t"));
 				string elabel = details[2].substr(1, details[2].length()-2);
 				//cout << "SRC:" << details[1] << ",LABEL:" << elabel << ",DST:" << details[3] << endl;
-				_geds[cnt-1].addE(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(elabel), boost::lexical_cast<long>(details[3]));
+				if (!_geds[cnt-1].addE(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(elabel), boost::lexical_cast<long>(details[3]))) {
+					cout << "GED V ID does not exist, in GED " << cnt << " in File " << gedpath << "\n";
+					exit(0);
+				}
 			} else if (line[0] == '%' && line[1] == 'X') { //X?
 				isX = true;
 			} else if (line[0] == '%' && line[1] == 'Y') { //Y?
@@ -147,7 +150,7 @@ int main(int argc, char **argv) {
 
 	//print info
 	cg.printGraph();
-	//cg.printGEDs();
+	cg.printGEDs();
 
   //validate
 	cg.validation();
