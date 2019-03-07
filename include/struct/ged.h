@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <stack>
+#include <set>
 
 #include "./graph.h"
 #include "../util.h"
@@ -158,7 +159,7 @@ class GED {
       vector<vector<Node>> g_cans;
       vector<Node>& g_allNodes = g.allNodes();
       vector<Node>& p_nodes = _nodes;
-      int cnt = p_nodes.size();
+      const int cnt = p_nodes.size();
       // obetain all possible candidates in graph
       // CAUTION: value of vertex is not considered. (all are ANY)
       for (auto& p_node:p_nodes) {
@@ -186,10 +187,40 @@ class GED {
       }
       //cout << "\n";
       vector<int> old = layer;
+      layer[0]++;
 
+      vector<Node> isomor_nodes;
+      set<string> values;
+      int find_num = 0; // the number of finding this ged
       int t_cnt = 0;
-      while (true) {
-        cout << "T_num:" << t_cnt++ << "\n";
+      bool iterate = true;
+      while (iterate) {
+        //cout << "T_num:" << t_cnt++ << "\n";
+        // update candidates
+        for (int i = 0; i < layer.size(); i++) {
+          if (layer[i] == 0) {
+            layer[i] = old[i];
+          } else {
+            layer[i]--;
+            break;
+          }
+        }
+        //if all posibilities are iterated, then break
+        int flag = 0;
+        for (int i = 0; i < cnt; i++) {
+          //cout << "N:" << layer[i] << ",";
+          flag += layer[i];
+        }
+        //cout << flag << "\n";
+        if (flag == 0) { iterate = false;}
+        //except homomorphism
+        set<long> g_v;
+        for (int i = 0; i < cnt; i++) {
+          g_v.emplace(g_cans[i][layer[i]].v().id());
+        }
+        if (g_v.size() != cnt) continue;
+
+        //check validation of pattern
         bool isP = true;
         for (int i = 0; i < p_nodes.size(); i++) {
           if (p_nodes[i].neighbors().size() == 0) {
@@ -208,14 +239,14 @@ class GED {
             Node& p_dst_node = GED::node(p_neighbors[j]);
             int pos = GED::pos(p_dst_node);
             Node& g_dst_node = g_cans[pos][layer[pos]];
-            cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
+            /*cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
             cout << "G:" << g_dst_node.v().id() << "," << g_dst_node.v().label() << ",{";
             vector<long> g_test;
             g_node.elabel(g_dst_node, g_test);
             for (auto tt:g_test) {
               cout << tt << ",";
             }
-            cout << "}\n";
+            cout << "}\n";*/
             if (g_node.v().id() == g_dst_node.v().id() || p_dst_node.v().label() != g_dst_node.v().label()) {
               //remove self circle
               //judge whether neighbor's label is equal
@@ -236,12 +267,12 @@ class GED {
             }
           }
         }
+        //check validation of literals
         bool isX = true;
         bool isY = true;
         if (isP) {
-          cout << "Pattern is Correct!\n";
+          //cout << "Pattern is Correct!\n";
           // check literal
-          vector<long> x_g_id; // TODO: y literal is not the same vertex with x literal
           for (int j = 0; j < 2; j++) {
             vector<GED_TYPE>& types = (j == 0) ? _x_type : _y_type;
             map<long, string>::iterator it = (j == 0) ? _x_matches.begin() : _y_matches.begin();
@@ -251,14 +282,32 @@ class GED {
                 string value = (it++)->second;
                 int pos = GED::pos(vid);
                 if (pos == -1) { return false;}
-                cout << "value:" << value << "," << g_cans[pos][layer[pos]].v().value() << "\n";
+                //cout << "value:" << value << "," << g_cans[pos][layer[pos]].v().value() << "\n";
                 if (value != g_cans[pos][layer[pos]].v().value()) {
                   if (j == 0) {
                     isX = false;
+                    break;
                   } else {
-                    isY = false;
+                    if (values.size() == 0) {
+                      vector<Node> g_tmp;
+                      for (int k = 0; k < layer.size(); k++) {
+                        g_tmp.emplace_back(g_cans[k][layer[k]]);
+                      }
+                      g_cans[pos][layer[pos]].getIsomorNodes(g_tmp, isomor_nodes);
+                    }
+                    bool find = false;
+                    for (auto& node:isomor_nodes) {
+                      if (value == node.v().value()) {
+                        find = true;
+                        values.emplace(value);
+                        break;
+                      }
+                    }
+                    if (!find || values.size() > isomor_nodes.size()) {
+                      isY = false;
+                      break;
+                    }
                   }
-                  break;
                 }
               } else if (type == EQ_VAR) {
                 long a_id = it->first;
@@ -304,31 +353,14 @@ class GED {
                 }
               }
             }
-            cout << isX << "," << isY << "\n";
+            //cout << isX << "," << isY << "\n";
             if (!isX) break;
           }
         }
-
-        if (isX && !isY) {
-          return false;
-        }
-        // update candidates
-        int flag = 0;
-        for (int i = 0; i < cnt; i++) {
-          flag += layer[i];
-        }
-        if (flag == 0) break;
-        int total = layer.size();
-        for (int i = 0; i < layer.size(); i++) {
-          if (layer[i] == 0) {
-            layer[i] = old[i];
-          } else {
-            layer[i]--;
-            break;
-          }
-        }
+        if (isX && !isY) { return false;} //satisfy X but not Y
+        if (isP && isX && isY) { find_num++;} //find one satisfing ged
       }
-      return true;
+      return (find_num == 0) ? false : true;
     }
 
     void toString(string& str) {

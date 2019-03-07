@@ -1,0 +1,10 @@
+%Gid:179
+%Lid:0#179-1-Catalan_language#0#0#1
+v	0	6	ANY
+v	2	9	ANY
+v	1	3	ANY
+e	0	{2}	1
+e	0	{8}	2
+%X
+%Y
+eq-let	1	Catalan_language

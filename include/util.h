@@ -9,7 +9,7 @@ enum GED_TYPE {
 };
 
 template <typename T>
-inline bool const interEmpty (vector<T> const& a, vector<T> const& b) {
+bool const interEmpty (vector<T> const& a, vector<T> const& b) {
   for (int i = 0; i < a.size(); i++) {
     for (int j = 0; j < b.size(); j++) {
       if (a[i] == b[i]) {

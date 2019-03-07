@@ -40,6 +40,67 @@ class Node {
       }
     }
 
+    void getIsomorNodes (vector<Node>& g, vector<Node>& isomor_nodes) {
+      // check self
+      vector<Node> t1;
+      for (auto& n:g) {
+        if (n.v().label() == _vertex.label()) {
+          t1.emplace_back(n);
+        }
+      }
+      // check its neighbors
+      vector<long>& src_neighbors = _neighbors;
+      vector<long>& src_elabels = _elabels;
+      vector<Node> t2;
+      for (auto& n:t1) {
+        vector<long>& n_neighbors = n.neighbors();
+        vector<long>& n_elabels = n.elabels();
+        int src_len = src_neighbors.size();
+        int n_len = n_neighbors.size();
+        if (src_len != n_len) continue;
+        int i;
+        for (i = 0; i < src_len; i++) {
+          if (src_neighbors[i] != n_neighbors[i] || src_elabels[i] != n_elabels[i]) break;
+        }
+        if (i == src_len) {
+          t2.emplace_back(n);
+        }
+      }
+      // check its parents
+      vector<Node> src_parents;
+      vector<long> src_p_elabels;
+      getParents(g, _vertex.id(), src_parents, src_p_elabels);
+      for (auto& n:t2) {
+        vector<Node> n_parents;
+        vector<long> n_p_elabels;
+        getParents(g, n.v().id(), n_parents, n_p_elabels);
+        int src_len = src_parents.size();
+        int n_len = n_parents.size();
+        if (src_len != n_len) continue;
+        int i;
+        for (i = 0; i < src_len; i++) {
+          if (src_parents[i].v().id() != n_parents[i].v().id() || src_p_elabels[i] != n_p_elabels[i]) break;
+        }
+        if (i == src_len) {
+          isomor_nodes.emplace_back(n);
+        }
+      }
+    }
+
+    void getParents(vector<Node>& g, const long id, vector<Node>& parents, vector<long>& elabels) {
+      for (auto& n:g) {
+        vector<long>& n_neighbors = n.neighbors();
+        vector<long>& n_elabels = n.elabels();
+        for (int i = 0; i < n_neighbors.size(); i++) {
+          if (n_neighbors[i] == id) {
+            parents.emplace_back(n);
+            elabels.emplace_back(n_elabels[i]);
+            break;
+          }
+        }
+      }
+    }
+
 	private:
 		Vertex _vertex; //source
 		vector<long> _neighbors; //destinations
