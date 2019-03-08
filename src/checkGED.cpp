@@ -98,15 +98,24 @@ void CheckGED::printGEDs() {
 }
 
 void CheckGED::validation() {
+	clock_t start, end, tmp;
+	tmp = start = clock();
 	for (int i = 0; i < _geds.size(); i++) {
 		cout << "Checking NO." << (i+1) << " GED";
-		if(!_geds[i].existGED(_graph)) {
+		if (!_geds[i].existGED(_graph)) {
 			_active[i] = false;
 			cout << "\t0\n";
 		} else {
 			cout << "\t1\n";
 		}
+		if ((i+1)%200 == 0) {
+			end = clock();
+			cout << "Cost: " << (double)(end - tmp)/CLOCKS_PER_SEC << " s\n";
+			tmp = end;
+		}
 	}
+	end = clock();
+	cout << "Total cost: " << (double)(end - start)/CLOCKS_PER_SEC << " s\n";
 	cout << "\nThe results:\n";
 	for (int i = 0; i < _active.size(); i++) {
 		if (_active[i]) {
