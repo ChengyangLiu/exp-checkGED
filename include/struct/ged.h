@@ -183,9 +183,9 @@ class GED {
       for (int i = 0; i < cnt; i++) {
         int can_num = g_cans[i].size() - 1;
         layer.emplace_back(can_num);
-        //cout << can_num << "\t";
+        //cout << can_num << "\t"; //test
       }
-      //cout << "\n";
+      //cout << "\n"; //test
       vector<int> old = layer;
       layer[0]++;
 
@@ -195,7 +195,7 @@ class GED {
       int t_cnt = 0;
       bool iterate = true;
       while (iterate) {
-        //cout << "T_num:" << t_cnt++ << "\n";
+        //cout << "T_num:" << t_cnt++ << "\n"; //test
         // update candidates
         for (int i = 0; i < layer.size(); i++) {
           if (layer[i] == 0) {
@@ -208,10 +208,10 @@ class GED {
         //if all posibilities are iterated, then break
         int flag = 0;
         for (int i = 0; i < cnt; i++) {
-          //cout << "N:" << layer[i] << ",";
+          //cout << "N:" << layer[i] << ","; //test
           flag += layer[i];
         }
-        //cout << flag << "\n";
+        //cout << flag << "\n"; //test
         if (flag == 0) { iterate = false;}
         //except homomorphism
         set<long> g_v;
@@ -223,55 +223,70 @@ class GED {
         //check validation of pattern
         bool isP = true;
         for (int i = 0; i < p_nodes.size(); i++) {
-          if (p_nodes[i].neighbors().size() == 0) {
+          if (p_nodes[i].neighbors().size() == 0) { //only check node with neighbors in pattern
             continue;
           }
           // check edge relation
-          vector<long>& p_neighbors = p_nodes[i].neighbors();
+          bool findNode = true;
           Node& g_node = g_cans[i][layer[i]];
-          if (p_neighbors.size() > g_node.neighbors().size()) {
+          vector<long>& p_neighbors = p_nodes[i].neighbors();
+          vector<long>& g_neighbors = g_node.neighbors();
+          if (p_neighbors.size() > g_neighbors.size()) {
             //if num of p_node's neighbors > num of g_node's neighbors, pruning
             isP = false;
             break;
           }
           vector<long>& p_elabels = p_nodes[i].elabels();
+          vector<long>& g_elabels = g_node.elabels();
           for(int j = 0; j < p_neighbors.size(); j++) {
-            Node& p_dst_node = GED::node(p_neighbors[j]);
-            int pos = GED::pos(p_dst_node);
-            Node& g_dst_node = g_cans[pos][layer[pos]];
-            /*cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
-            cout << "G:" << g_dst_node.v().id() << "," << g_dst_node.v().label() << ",{";
-            vector<long> g_test;
-            g_node.elabel(g_dst_node, g_test);
-            for (auto tt:g_test) {
-              cout << tt << ",";
+            int k;
+            bool sameELabel = false;
+            for (k = 0; k < g_elabels.size(); k++) {
+              //cout << "Elabel:" << p_elabels[j] << "," << g_elabels[k] << "\n"; //test
+              if (g_elabels[k] == p_elabels[j]) { //elabel is equal
+                sameELabel = true;
+                Node& p_dst_node = GED::node(p_neighbors[j]);
+                int pos = GED::pos(p_dst_node);
+                Node& g_dst_node = g_cans[pos][layer[pos]];
+                //test
+                /*cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
+                cout << "G:" << g_dst_node.v().id() << "," << g_dst_node.v().label() << ",{";
+                vector<long> g_test;
+                g_node.elabel(g_dst_node, g_test);
+                for (auto tt:g_test) {
+                  cout << tt << ",";
+                }
+                cout << "}\n";
+                cout << "Same:" << g_neighbors[k] << "," << g_dst_node.v().id() << "\n";
+                cout << "NVlabel:" << p_dst_node.v().label() << "," << g_dst_node.v().label() << "\n";*/
+                if (g_neighbors[k] == g_dst_node.v().id() && p_dst_node.v().label() == g_dst_node.v().label()) {
+                  //judge whether structures are same
+                  //judge whether neighbor's label is equal
+                  break;
+                }
+              }
             }
-            cout << "}\n";*/
-            if (g_node.v().id() == g_dst_node.v().id() || p_dst_node.v().label() != g_dst_node.v().label()) {
-              //remove self circle
-              //judge whether neighbor's label is equal
-              isP = false;
+            if (!sameELabel) { //present g_node don't have satisfying neighbors with given elabel, so remove it.
+              g_cans[i].erase(g_cans[i].begin() + layer[i]);
+              old[i]--;
+              findNode = false;
               break;
-            } else { //judge whether neighbor's elabel is equal
-              vector<long> g_elabels;
-              g_node.elabel(g_dst_node, g_elabels);
-              int k = 0;
-              int label_num = g_elabels.size();
-              for (; k < label_num; k++) {
-                if (g_elabels[k] == p_elabels[j]) break;
-              }
-              if (k == label_num) {
-                isP = false;
-                break;
-              }
             }
+            if (k == g_elabels.size()) {
+              findNode = false;
+              break;
+            }
+          }
+          if (!findNode) {
+            isP = false;
+            break;
           }
         }
         //check validation of literals
         bool isX = true;
         bool isY = true;
         if (isP) {
-          //cout << "Pattern is Correct!\n";
+          //cout << "Pattern is Correct!\n"; //test
           // check literal
           for (int j = 0; j < 2; j++) {
             vector<GED_TYPE>& types = (j == 0) ? _x_type : _y_type;
@@ -282,7 +297,7 @@ class GED {
                 string value = (it++)->second;
                 int pos = GED::pos(vid);
                 if (pos == -1) { return false;}
-                //cout << "value:" << value << "," << g_cans[pos][layer[pos]].v().value() << "\n";
+                //cout << "value:" << value << "," << g_cans[pos][layer[pos]].v().value() << "\n"; //test
                 if (value != g_cans[pos][layer[pos]].v().value()) {
                   if (j == 0) {
                     isX = false;
@@ -318,7 +333,7 @@ class GED {
                   int a_pos = GED::pos(a_id);
                   int b_pos = GED::pos(b_id);
                   if (a_pos == -1 || b_pos == -1) { return false;}
-                  //cout << "value:" << g_cans[a_pos][layer[a_pos]].v().value() << "," << g_cans[b_pos][layer[b_pos]].v().value() << "\n";
+                  //cout << "value:" << g_cans[a_pos][layer[a_pos]].v().value() << "," << g_cans[b_pos][layer[b_pos]].v().value() << "\n"; //test
                   if (g_cans[a_pos][layer[a_pos]].v().value() != g_cans[b_pos][layer[b_pos]].v().value()) {
                     if (j == 0) {
                       isX = false;
@@ -353,7 +368,7 @@ class GED {
                 }
               }
             }
-            //cout << isX << "," << isY << "\n";
+            //cout << isX << "," << isY << "\n"; //test
             if (!isX) break;
           }
         }
