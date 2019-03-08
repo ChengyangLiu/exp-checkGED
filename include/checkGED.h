@@ -22,6 +22,7 @@ class CheckGED {
 		void printGEDs();
 		void validation();
 		void writeValidatedGEDs(const string& gedpath);
+    void delivery(string& gedpath, int frag_num);
 
 	private:
 		Graph _graph;

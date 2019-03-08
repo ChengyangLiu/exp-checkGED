@@ -10,10 +10,10 @@ using namespace std;
 
 void CheckGED::loadGEDs(const string& gedpath) {
 	string line;
+	int cnt = 0;
+	bool isX = true;
 	try{
 		ifstream fin(gedpath);
-		int cnt = 0;
-		bool isX = true;
 		while(getline(fin, line)) {
 			if (line.length() < 2) continue;
 			if (line[0] == '%' && line[1] == 'G') { //read gid and lid
@@ -22,21 +22,27 @@ void CheckGED::loadGEDs(const string& gedpath) {
 				getline(fin, line);
 				string lid = line.substr(5, line.length() - 5);
 				//cout << "L:" << lid << endl;
-				GED ged(boost::lexical_cast<long>(gid), lid);
+				GED ged(gid, lid);
 				_geds.emplace_back(ged);
 				_active.emplace_back(true);
 				++cnt;
 			} else if (line[0] == 'v') { //read v
-				vector<string> details;
-				boost::split(details, line, boost::is_any_of("\t"));
-				//cout << "ID:" << details[1] << ",LABEL:" << details[2] << ",VALUE:" << details[3] << endl;
-				_geds[cnt-1].addV(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(details[2]), details[3]);
+				stringstream ss(line);
+				long id, label;
+				string value;
+				ss >> value >> id >> label >> value;
+				//cout << "ID:" << id << ",LABEL:" << label << ",VALUE:" << value << "\n";
+				_geds[cnt-1].addV(id, label, value);
 			} else if (line[0] == 'e' && line[1] != 'q') { //read e
-				vector<string> details;
-				boost::split(details, line, boost::is_any_of("\t"));
-				string elabel = details[2].substr(1, details[2].length()-2);
-				//cout << "SRC:" << details[1] << ",LABEL:" << elabel << ",DST:" << details[3] << endl;
-				if (!_geds[cnt-1].addE(boost::lexical_cast<long>(details[1]), boost::lexical_cast<long>(elabel), boost::lexical_cast<long>(details[3]))) {
+				stringstream ss(line);
+				long src, dst;
+				string label;
+				ss >> label >> src >> label >> dst;
+				if (label[0] == '{') {
+					label = label.substr(1, label.length()-2);
+				}
+				//cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst << "\n";
+				if (!_geds[cnt-1].addE(src, boost::lexical_cast<long>(label), dst)) {
 					cout << "GED V ID does not exist, in GED " << cnt << " in File " << gedpath << "\n";
 					exit(0);
 				}
@@ -80,10 +86,10 @@ void CheckGED::loadGEDs(const string& gedpath) {
 			}
 		}
 	} catch(boost::bad_lexical_cast& e) {
-		cout << e.what() << endl;
+		cout << "GEDReadingError in GED NO." << (cnt-1) << ": " << e.what() << "\n";
 		exit(0);
 	} catch (exception& e) {
-		cout << e.what();
+		cout << e.what() << "\n";
 		exit(0);
 	}
 }
@@ -141,14 +147,62 @@ void CheckGED::writeValidatedGEDs(const string& gedpath) {
 	fout.close();
 }
 
+void CheckGED::delivery(string& gedpath, int frag_num) {
+	string line;
+  int ged_cnt = 0;
+	try{
+		ifstream fin(gedpath);
+    vector<string> strList;
+    while(getline(fin, line)) {
+      if (line[0] == '%' && line[1] == 'G') { ged_cnt++;}
+      strList.emplace_back(line);
+    }
+		//cout << frag_num << "\n";
+		//cout << ged_cnt << "\n";
+    const int volume = ((int) ged_cnt/frag_num) + 1;
+		//cout << volume << "\n";
+
+    int frag_id = 0;
+    int i = 0;
+		int total = strList.size();
+		string last = "";
+    for (; frag_id < frag_num; frag_id++) {
+			int now_cnt = 0;
+			string resfile = gedpath + boost::lexical_cast<string>(frag_id);
+			ofstream fout(resfile);
+			if (last != "") fout << last << "\n";
+			for (; i < total; i++) {
+				if (strList[i][0] == '%' && strList[i][1] == 'G') {
+					now_cnt++;
+					if (now_cnt > volume) {
+						break;
+					}
+				}
+				fout << strList[i] << "\n";
+			}
+			fout.close();
+		}
+  } catch (exception& e) {
+		cout << e.what();
+		exit(0);
+	}
+}
+
 
 int main(int argc, char **argv) {
 
 	string filename = "";
 	string gedpath = "";
-	if (argc > 2) { //get 1 parameter: location
+	if (argc == 3) { //get 1 parameter: location
 		filename = argv[1];
 		gedpath = argv[2];
+	} else if (argc == 4) {
+		filename = argv[1];
+		gedpath = argv[2];
+		int frag_num = atoi(argv[3]);
+		CheckGED cg;
+		cg.delivery(gedpath, frag_num);
+		exit(1);
 	} else {
 		cout << "Parameter <file path> must be needed!" << endl;
 		exit(0);
@@ -156,10 +210,9 @@ int main(int argc, char **argv) {
 
 	CheckGED cg;
 	cg.loadGraph(filename);
-	cg.loadGEDs(gedpath);
-
-	//print info
 	//cg.printGraph();
+
+	cg.loadGEDs(gedpath);
 	//cg.printGEDs();
 
   //validate

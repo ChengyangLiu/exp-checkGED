@@ -13,13 +13,13 @@ class GED {
 		GED(){}
 		~GED(){}
 
-    GED(long gid, string& lid) {
+    GED(string& gid, string& lid) {
       _gid = gid;
       _lid = lid;
       _cnt = 0;
     }
 
-    GED(long gid, string& lid, map<long, long>& id_map, long cnt, vector<Node>& nodes,
+    GED(string& gid, string& lid, map<long, long>& id_map, long cnt, vector<Node>& nodes,
         vector<GED_TYPE>& x_type, vector<GED_TYPE>& y_type,
         map<long, string>& x_matches, map<long, string>& y_matches) {
       _gid = gid;
@@ -86,7 +86,7 @@ class GED {
     inline map<long, string>& xmatches() {return _x_matches;}
     inline map<long, string>& ymatches() {return _y_matches;}
 
-    inline long gid() {return _gid;}
+    inline string& gid() {return _gid;}
     inline string& lid() {return _lid;}
 
     void patternString(string& str) {
@@ -108,7 +108,7 @@ class GED {
           }
         }
       } catch(boost::bad_lexical_cast& e) {
-        cout << e.what() << endl;
+        cout << "PatternStringError: " << e.what() << "\n";
         exit(0);
       }
     }
@@ -150,12 +150,14 @@ class GED {
           }
         }
       } catch(boost::bad_lexical_cast& e) {
-        cout << e.what() << endl;
+        cout << "LiteralStringError: " << e.what() << "\n";
         exit(0);
       }
     }
 
     bool existGED(Graph& g) {
+      for (auto& type:_x_type) { if(type == EQ_ID) return true;}
+      for (auto& type:_y_type) { if(type == EQ_ID) return true;}
       vector<vector<Node>> g_cans;
       vector<Node>& g_allNodes = g.allNodes();
       vector<Node>& p_nodes = _nodes;
@@ -326,9 +328,11 @@ class GED {
                 }
               } else if (type == EQ_VAR) {
                 long a_id = it->first;
-                long a_elabel = boost::lexical_cast<long>((it++)->second);
+                long a_elabel = atoi((it++)->second.c_str());
+                //cout << a_elabel << "\n"; //test
                 long b_id = it->first;
-                long b_elabel = boost::lexical_cast<long>((it++)->second);
+                long b_elabel = atoi((it++)->second.c_str());
+                //cout << b_elabel << "\n"; //test
                 if (a_elabel == -1) { //elabel = -1, compare their name
                   int a_pos = GED::pos(a_id);
                   int b_pos = GED::pos(b_id);
@@ -345,7 +349,9 @@ class GED {
                 } else { //compare their neighbors with given elabels
                   int a_pos = GED::pos(a_id);
                   int b_pos = GED::pos(b_id);
+                  //cout << "POS:" << a_pos << "," << b_pos << "\n"; //test
                   if (a_pos == -1 || b_pos == -1) { return false;}
+                  //cout << "value:" << g_cans[a_pos][layer[a_pos]].v().value() << "," << g_cans[b_pos][layer[b_pos]].v().value() << "\n"; //test
                   vector<long> a_dst_id, b_dst_id;
                   for (int k = 0; k < 2; k++) { //find all neighbors with given elabel
                     vector<long>& dst_id = (k == 0) ? a_dst_id : b_dst_id;
@@ -379,7 +385,7 @@ class GED {
     }
 
     void toString(string& str) {
-      str = str + "%Gid:" + boost::lexical_cast<string>(gid()) + "\n";
+      str = str + "%Gid:" + gid() + "\n";
       str = str + "%Lid:" + lid() + "\n";
       patternString(str);
       literalString(str);
@@ -401,7 +407,7 @@ class GED {
       return -1;
     }
 
-    long _gid;
+    string _gid;
     string _lid;
 
     /* patterns */
