@@ -229,6 +229,7 @@ class GED {
             continue;
           }
           // check edge relation
+#ifdef E_FIRST //check edges' info first
           bool findNode = true;
           Node& g_node = g_cans[i][layer[i]];
           vector<long>& p_neighbors = p_nodes[i].neighbors();
@@ -240,7 +241,7 @@ class GED {
           }
           vector<long>& p_elabels = p_nodes[i].elabels();
           vector<long>& g_elabels = g_node.elabels();
-          for(int j = 0; j < p_neighbors.size(); j++) {
+          for (int j = 0; j < p_neighbors.size(); j++) {
             int k;
             bool sameELabel = false;
             for (k = 0; k < g_elabels.size(); k++) {
@@ -283,6 +284,47 @@ class GED {
             isP = false;
             break;
           }
+#elif V_FIRST //check neighbors' info first
+          vector<long>& p_neighbors = p_nodes[i].neighbors();
+          Node& g_node = g_cans[i][layer[i]];
+          if (p_neighbors.size() > g_node.neighbors().size()) {
+            //if num of p_node's neighbors > num of g_node's neighbors, pruning
+            isP = false;
+            break;
+          }
+          vector<long>& p_elabels = p_nodes[i].elabels();
+          for (int j = 0; j < p_neighbors.size(); j++) {
+            Node& p_dst_node = GED::node(p_neighbors[j]);
+            int pos = GED::pos(p_dst_node);
+            Node& g_dst_node = g_cans[pos][layer[pos]];
+            /*cout << "P:" << p_dst_node.v().id() << "," << p_dst_node.v().label() << "," << p_elabels[j] << "\n";
+            cout << "G:" << g_dst_node.v().id() << "," << g_dst_node.v().label() << ",{";
+            vector<long> g_test;
+            g_node.elabel(g_dst_node, g_test);
+            for (auto tt:g_test) {
+              cout << tt << ",";
+            }
+            cout << "}\n";*/
+            if (g_node.v().id() == g_dst_node.v().id() || p_dst_node.v().label() != g_dst_node.v().label()) {
+              //remove self circle
+              //judge whether neighbor's label is equal
+              isP = false;
+              break;
+            } else { //judge whether neighbor's elabel is equal
+              vector<long> g_elabels;
+              g_node.elabel(g_dst_node, g_elabels);
+              int k = 0;
+              int label_num = g_elabels.size();
+              for (; k < label_num; k++) {
+                if (g_elabels[k] == p_elabels[j]) break;
+              }
+              if (k == label_num) {
+                isP = false;
+                break;
+              }
+            }
+          }
+#endif
         }
         //check validation of literals
         bool isX = true;
