@@ -156,8 +156,6 @@ class GED {
     }
 
     bool validateGED(Graph& g) {
-      for (auto& type:_x_type) { if(type == EQ_ID) return true;}
-      for (auto& type:_y_type) { if(type == EQ_ID) return true;}
       vector<vector<Node>> g_cans;
       vector<Node>& g_allNodes = g.allNodes();
       vector<Node>& p_nodes = _nodes;
@@ -414,6 +412,8 @@ class GED {
                     break;
                   }
                 }
+              } else if (type == EQ_ID) {
+                return false;
               }
             }
             //cout << isX << "," << isY << "\n"; //test
@@ -423,6 +423,7 @@ class GED {
         if (isX && !isY) { return false;} //satisfy X but not Y
         if (isP && isX && isY) { find_num++;} //find one satisfing ged
       }
+      if (_y_type[0] == EQ_ID) { return true;} //graph does not have the same pattern
       return (find_num == 0) ? false : true;
     }
 
