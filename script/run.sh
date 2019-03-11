@@ -4,8 +4,9 @@ ROOT=`git rev-parse --show-toplevel`
 
 GRAPH_FILE=../data/dbpedia_label39      # graph file path
 GED_FILE=../data/dbpedia_label39.ged    # ged file path
-GED_PART=16    # parts number
+GED_PART=1    # parts number
 
+cd $ROOT
 cd build
 cmake ..
 make

@@ -155,7 +155,7 @@ class GED {
       }
     }
 
-    bool existGED(Graph& g) {
+    bool validateGED(Graph& g) {
       for (auto& type:_x_type) { if(type == EQ_ID) return true;}
       for (auto& type:_y_type) { if(type == EQ_ID) return true;}
       vector<vector<Node>> g_cans;
@@ -382,6 +382,31 @@ class GED {
         if (isP && isX && isY) { find_num++;} //find one satisfing ged
       }
       return (find_num == 0) ? false : true;
+    }
+
+    bool checkLiteralFormat() {
+      for (int i = 0; i < 2; i++) {
+        vector<GED_TYPE>& types = (i == 0) ? _x_type : _y_type;
+        map<long, string>::iterator it = (i == 0) ? _x_matches.begin() : _y_matches.begin();
+        for (auto type:types) {
+          vector<long> ids;
+          if (type == EQ_LET) {
+            ids.emplace_back((it++)->first);
+          } else if (type == EQ_VAR) {
+            ids.emplace_back((it++)->first);
+            ids.emplace_back((it++)->first);
+          } else if (type == EQ_ID) {
+            ids.emplace_back((it++)->first);
+            ids.emplace_back((it++)->first);
+          }
+          for (vector<long>::iterator vit = ids.begin(); vit != ids.end(); vit++) {
+            if (!nodeExist(*vit)) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
     }
 
     void toString(string& str) {

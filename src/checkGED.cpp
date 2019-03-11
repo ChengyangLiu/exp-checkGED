@@ -108,11 +108,16 @@ void CheckGED::validation() {
 	tmp = start = clock();
 	for (int i = 0; i < _geds.size(); i++) {
 		cout << "Checking NO." << (i+1) << " GED";
-		if (!_geds[i].existGED(_graph)) {
+		if (!_geds[i].checkLiteralFormat()) {
 			_active[i] = false;
-			cout << "\t0\n";
+			cout << "\t-1\n"; //Literals are wrong format.
 		} else {
-			cout << "\t1\n";
+			if (!_geds[i].validateGED(_graph)) {
+				_active[i] = false;
+				cout << "\t0\n"; //The GED is wrong.(maybe pattern or literals do not exist or "X->Y" is not one and only in graph)
+			} else {
+				cout << "\t1\n"; //The GED is right.(pattern is right and "X->Y" is unique)
+			}
 		}
 		if ((i+1)%200 == 0) {
 			end = clock();
@@ -187,7 +192,6 @@ void CheckGED::delivery(string& gedpath, int frag_num) {
 		exit(0);
 	}
 }
-
 
 int main(int argc, char **argv) {
 
