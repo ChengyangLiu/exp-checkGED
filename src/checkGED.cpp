@@ -214,10 +214,10 @@ int main(int argc, char **argv) {
 
 	CheckGED cg;
 	cg.loadGraph(filename);
-	//cg.printGraph();
+	cg.printGraph();
 
 	cg.loadGEDs(gedpath);
-	//cg.printGEDs();
+	cg.printGEDs();
 
   //validate
 	cg.validation();

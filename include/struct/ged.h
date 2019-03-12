@@ -195,7 +195,7 @@ class GED {
       int t_cnt = 0;
       bool iterate = true;
       while (iterate) {
-        //cout << "T_num:" << t_cnt++ << "\n"; //test
+         //cout << "T_num:" << t_cnt++ << "\n"; //test
         // update candidates
         for (int i = 0; i < layer.size(); i++) {
           if (layer[i] == 0) {
@@ -269,6 +269,13 @@ class GED {
             }
             if (!sameELabel) { //present g_node don't have satisfying neighbors with given elabel, so remove it.
               g_cans[i].erase(g_cans[i].begin() + layer[i]);
+              if (old[i] == 0) {
+                if ((_x_type.size() != 0 && _x_type[0] == EQ_ID) || (_y_type.size() != 0 && _y_type[0] == EQ_ID)) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
               old[i]--;
               findNode = false;
               break;
