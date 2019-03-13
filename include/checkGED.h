@@ -24,6 +24,18 @@ class CheckGED {
 		void writeValidatedGEDs(const string& gedpath);
     void delivery(string& gedpath, int frag_num);
 
+#ifdef BOOST_GRAPH
+    void convert2BG(Graph& g, vector<GED>& ged);
+    void boost_vf2();
+
+    inline graph_type& boost_graph() {return _boost_graph;}
+    inline vector<graph_type>& boost_patterns() {return _boost_patterns;}
+
+  private:
+    graph_type _boost_graph;
+    vector<graph_type> _boost_patterns;
+#endif
+
 	private:
 		Graph _graph;
 		vector<GED> _geds;

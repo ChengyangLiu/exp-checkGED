@@ -88,7 +88,7 @@ void CheckGED::loadGEDs(const string& gedpath) {
 	} catch(boost::bad_lexical_cast& e) {
 		cout << "GEDReadingError in GED NO." << (cnt-1) << ": " << e.what() << "\n";
 		exit(0);
-	} catch (exception& e) {
+	} catch (std::exception& e) {
 		cout << e.what() << "\n";
 		exit(0);
 	}
@@ -102,6 +102,65 @@ void CheckGED::printGEDs() {
 		cout << str << "\n";
 	}
 }
+
+#ifdef BOOST_GRAPH
+
+/* CAUTION: the graph's id must start from 0 and be continous! */
+void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
+	// Add vertices...
+	vector<Node>& nodes = g.allNodes();
+	for (auto& n:nodes) { // start from id 0
+		add_vertex(vertex_property(n.v().label()), _boost_graph);
+	}
+	//... and edges
+	for (auto& n:nodes) {
+		vector<long>& eL = n.elabels();
+		vector<long>& eN = n.neighbors();
+		for (int i = 0; i < eL.size(); i++) {
+			add_edge(n.v().id(), eN[i], edge_property(eL[i]), _boost_graph);
+		}
+	}
+
+	for (auto& ged:geds) {
+		// Create graph1
+		graph_type pattern;
+		// Add vertices...
+		vector<Node>& nodes = ged.pattern();
+		for (auto& n:nodes) { // start from id 0
+			add_vertex(vertex_property(n.v().label()), pattern);
+		}
+		//... and edges
+		for (auto& n:nodes) {
+			vector<long>& eL = n.elabels();
+			vector<long>& eN = n.neighbors();
+			for (int i = 0; i < eL.size(); i++) {
+				add_edge(n.v().id(), eN[i], edge_property(eL[i]), pattern);
+			}
+		}
+		_boost_patterns.emplace_back(pattern);
+	}
+}
+
+void CheckGED::boost_vf2() {
+	vector<graph_type>& bps = _boost_patterns;
+	int cnt = 0;
+	for (auto& bp:bps) {
+		cout << "No. " << ++cnt << ":\n";
+		// Create the vertex binary predicate
+		vertex_comp_t vertex_comp = make_property_map_equivalent(get(boost::vertex_name, bp), get(boost::vertex_name, _boost_graph));
+	  // Create the vertex binary predicate
+	  edge_comp_t edge_comp = make_property_map_equivalent(get(boost::edge_name, bp), get(boost::edge_name, _boost_graph));
+		// Create callback
+	  boost::vf2_print_callback<graph_type, graph_type> callback(bp, _boost_graph);
+	  // Print out all subgraph isomorphism mappings between graph1 and graph2.
+	  // Function vertex_order_by_mult is used to compute the order of
+	  // vertices of graph1. This is the order in which the vertices are examined
+	  // during the matching process.
+	  boost::vf2_subgraph_iso(bp, _boost_graph, callback, vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
+		cout << "\n";
+	}
+}
+#endif
 
 void CheckGED::validation() {
 	clock_t start, end, tmp;
@@ -187,42 +246,74 @@ void CheckGED::delivery(string& gedpath, int frag_num) {
 			}
 			fout.close();
 		}
-  } catch (exception& e) {
+  } catch (std::exception& e) {
 		cout << e.what();
 		exit(0);
 	}
 }
 
 int main(int argc, char **argv) {
-
+	int mode = 0;
+	int frag_num = 1;
 	string filename = "";
 	string gedpath = "";
-	if (argc == 3) { //get 1 parameter: location
-		filename = argv[1];
+	if (argc < 2) {
+		cout << "Missing Parameters!" << endl;
+		exit(0);
+	}
+	mode = atoi(argv[1]);
+	if (mode == 1) { //validate GEDs  ./checkGED 1 $Graph_file $GED_path
+		if (argc < 4) {
+			cout << "Missing Parameters!" << endl;
+			exit(0);
+		}
+		filename = argv[2];
+		gedpath = argv[3];
+
+		CheckGED cg;
+		Graph& g = cg.graph();
+		vector<GED>& geds = cg.geds();
+
+		cg.loadGraph(filename);
+		cg.printGraph();
+
+		cg.loadGEDs(gedpath);
+		cg.printGEDs();
+
+	#ifdef BOOST_GRAPH
+		cg.convert2BG(g, geds);
+		cg.boost_vf2();
+	#else
+	  //validate
+	  cg.validation();
+	  //write file
+	  cg.writeValidatedGEDs(gedpath);
+	#endif
+	} else if (mode == 2) { //cut GEDs ./checkGED 2 $GED_path NUM
+		if (argc < 4) {
+			cout << "Missing Parameters!" << endl;
+			exit(0);
+		}
 		gedpath = argv[2];
-	} else if (argc == 4) {
-		filename = argv[1];
-		gedpath = argv[2];
+
 		int frag_num = atoi(argv[3]);
 		CheckGED cg;
 		cg.delivery(gedpath, frag_num);
-		exit(1);
-	} else {
-		cout << "Parameter <file path> must be needed!" << endl;
-		exit(0);
+	} else if (mode == 3) { //rewrite Graph ./checkGED 3 $Graph_file
+		if (argc < 3) {
+			cout << "Missing Parameters!" << endl;
+			exit(0);
+		}
+		filename = argv[2];
+
+		CheckGED cg;
+		Graph& g = cg.graph();
+
+		cg.loadGraph(filename);
+		cg.printGraph();
+		// rewrite graph, make vertices start from id 0 and continous.
+		string repath = filename + ".remap";
+		g.rewriteGraph(repath);
 	}
-
-	CheckGED cg;
-	cg.loadGraph(filename);
-	cg.printGraph();
-
-	cg.loadGEDs(gedpath);
-	cg.printGEDs();
-
-  //validate
-	cg.validation();
-	//write file
-	cg.writeValidatedGEDs(gedpath);
-
 	return 1;
 }

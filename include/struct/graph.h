@@ -82,6 +82,34 @@ class Graph {
       }
     }
 
+    /* rewrite graph (vertexes start from 0 and are continous) */
+    void rewriteGraph(string& path) {
+      try {
+        ofstream fvout(path + ".v");
+        for(auto& node:_nodes) {
+          Vertex& vertex = node.v();
+          string value = vertex.value();
+          fvout << Graph::pos(vertex.id()) << "\t" << vertex.label() << "\t" << vertex.value() << "\n";
+        }
+        fvout.close();
+        ofstream feout(path + ".e");
+        for(auto& node:_nodes) {
+          Vertex& vertex = node.v();
+          vector<long>& neighbors = node.neighbors();
+          vector<long>& elabels = node.elabels();
+          int len = neighbors.size();
+          for(int i = 0; i < len; i++) {
+            Vertex& dst = Graph::node(neighbors[i]).v();
+            feout << Graph::pos(vertex.id()) << "\t" << elabels[i] << "\t" << Graph::pos(dst.id()) << "\n";
+          }
+        }
+        feout.close();
+      } catch(boost::bad_lexical_cast& e) {
+        cout << e.what() << endl;
+        exit(0);
+      }
+    }
+
     vector<Node>& allNodes() { return _nodes;}
 
   private:

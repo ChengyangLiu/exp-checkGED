@@ -155,6 +155,8 @@ class GED {
       }
     }
 
+
+
     bool validateGED(Graph& g) {
       vector<vector<Node>> g_cans;
       vector<Node>& g_allNodes = g.allNodes();
@@ -187,7 +189,6 @@ class GED {
       }
       //cout << "\n"; //test
       vector<int> old = layer;
-      layer[0]++;
 
       vector<Node> isomor_nodes;
       set<string> values;
@@ -228,15 +229,15 @@ class GED {
           }
           // check edge relation
 #ifdef E_FIRST //check edges' info first
-          bool findNode = true;
-          Node& g_node = g_cans[i][layer[i]];
           vector<long>& p_neighbors = p_nodes[i].neighbors();
+          Node& g_node = g_cans[i][layer[i]];
           vector<long>& g_neighbors = g_node.neighbors();
           if (p_neighbors.size() > g_neighbors.size()) {
             //if num of p_node's neighbors > num of g_node's neighbors, pruning
             isP = false;
             break;
           }
+          bool findNode = true;
           vector<long>& p_elabels = p_nodes[i].elabels();
           vector<long>& g_elabels = g_node.elabels();
           for (int j = 0; j < p_neighbors.size(); j++) {
@@ -290,6 +291,7 @@ class GED {
             break;
           }
 #elif V_FIRST //check neighbors' info first
+          // Discarded: do not have pruning, too much cost of time
           vector<long>& p_neighbors = p_nodes[i].neighbors();
           Node& g_node = g_cans[i][layer[i]];
           if (p_neighbors.size() > g_node.neighbors().size()) {
@@ -336,6 +338,7 @@ class GED {
         bool isY = true;
         if (isP) {
           //cout << "Pattern is Correct!\n"; //test
+          return true;
           // check literal
           for (int j = 0; j < 2; j++) {
             vector<GED_TYPE>& types = (j == 0) ? _x_type : _y_type;
