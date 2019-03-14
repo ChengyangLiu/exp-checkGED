@@ -338,7 +338,6 @@ class GED {
         bool isY = true;
         if (isP) {
           //cout << "Pattern is Correct!\n"; //test
-          return true;
           // check literal
           for (int j = 0; j < 2; j++) {
             vector<GED_TYPE>& types = (j == 0) ? _x_type : _y_type;
@@ -437,6 +436,164 @@ class GED {
       return (find_num == 0) ? false : true;
     }
 
+#ifdef BOOST_GRAPH
+    bool validateGED(Graph& g, vector<map<long, long>>& maps) {
+      int find_num = 0;
+      if (maps.size() == 0) { //do not have matches
+        if ((_x_type.size() != 0 && _x_type[0] == EQ_ID) ||
+            (_x_type.size() == 0 && _y_type.size() != 0 && _y_type[0] == EQ_ID)) {
+            // X:eq-id -> Y || X:NULL -> Y:eq-id
+          return true;
+        }
+      } else { //have matches
+        for (auto& m:maps) {
+          bool isX = true;
+          bool isY = true;
+          vector<GED_TYPE>& types = _x_type;
+          map<long, string>::iterator it = _x_matches.begin();
+          for (auto& type:types) { // check X
+            if (type == EQ_LET) {
+              long vid = it->first;
+              string value = (it++)->second;
+              long gid = m.get(vid);
+              Node& g_node = g.node(gid);
+              if (g_node.v().value() != value) { // value is not equal, break
+                isX = false;
+                break;
+              }
+            } else if (type == EQ_VAR) {
+              long a_id = it->first;
+              long a_elabel = atoi((it++)->second.c_str());
+              //cout << a_elabel << "\n"; //test
+              long b_id = it->first;
+              long b_elabel = atoi((it++)->second.c_str());
+              //cout << b_elabel << "\n"; //test
+              Node& g_node1 = g.node(m.get(a_id));
+              Node& g_node2 = g.node(m.get(b_id));
+              if (a_elabel == -1) { //elabel = -1, compare their name
+                if (g_node1.v().value() != g_node2.v().value()) {
+                  isX = false;
+                  break;
+                }
+              } else { //compare their neighbors with given elabels
+                // get node1's neighbors with given elabel
+                vector<Node> cans;
+                vector<long> eN1 = g_node1.neighbors();
+                vector<long> eL1 = g_node1.elabels();
+                for (int i = 0; i < eN1.size(); i++) {
+                  if (eL1[i] == a_elabel) {
+                    cans.emplace_back(g.node(eN1[i]));
+                  }
+                }
+                int be_cnt = cans.size();
+                if (be_cnt == 0) { // get 0, break
+                  isX = false;
+                  break;
+                }
+                // get node2's neighbors with given elabel
+                vector<long> eN2 = g_node2.neighbors();
+                vector<long> eL2 = g_node2.elabels();
+                for (int i = 0; i < eN2.size(); i++) {
+                  if (eL2[i] == b_elabel) {
+                    cans.emplace_back(g.node(eN2[i]));
+                  }
+                }
+                int af_cnt = cans.size();
+                if (af_cnt == be_cnt) { // get 0, break
+                  isX = false;
+                  break;
+                } else { // conpare all nodes are the same one
+                  long id = cans[0].v().id();
+                  int k = 1;
+                  for (; k < af_cnt; k++) {
+                    if (cans[k].v().id() != id) break;
+                  }
+                  if (k != af_cnt) {
+                    isX = false;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+          if (!isX) continue; // X is not satisfied, needn't to check Y, continue
+          types = _y_type;
+          it = _y_matches.begin();
+          for (auto& type:types) { // check Y
+            if (type == EQ_LET) {
+              long vid = it->first;
+              string value = (it++)->second;
+              long gid = m.get(vid);
+              Node& g_node = g.node(gid);
+              if (g_node.v().value() != value) { // value is not equal, break
+                isY = false;
+                break;
+              }
+            } else if (type == EQ_VAR) {
+              long a_id = it->first;
+              long a_elabel = atoi((it++)->second.c_str());
+              //cout << a_elabel << "\n"; //test
+              long b_id = it->first;
+              long b_elabel = atoi((it++)->second.c_str());
+              //cout << b_elabel << "\n"; //test
+              Node& g_node1 = g.node(m.get(a_id));
+              Node& g_node2 = g.node(m.get(b_id));
+              if (a_elabel == -1) { //elabel = -1, compare their name
+                if (g_node1.v().value() != g_node2.v().value()) {
+                  isY = false;
+                  break;
+                }
+              } else { //compare their neighbors with given elabels
+                // get node1's neighbors with given elabel
+                vector<Node> cans;
+                vector<long> eN1 = g_node1.neighbors();
+                vector<long> eL1 = g_node1.elabels();
+                for (int i = 0; i < eN1.size(); i++) {
+                  if (eL1[i] == a_elabel) {
+                    cans.emplace_back(g.node(eN1[i]));
+                  }
+                }
+                int be_cnt = cans.size();
+                if (be_cnt == 0) { // get 0, break
+                  isY = false;
+                  break;
+                }
+                // get node2's neighbors with given elabel
+                vector<long> eN2 = g_node2.neighbors();
+                vector<long> eL2 = g_node2.elabels();
+                for (int i = 0; i < eN2.size(); i++) {
+                  if (eL2[i] == b_elabel) {
+                    cans.emplace_back(g.node(eN2[i]));
+                  }
+                }
+                int af_cnt = cans.size();
+                if (af_cnt == be_cnt) { // get 0, break
+                  isY = false;
+                  break;
+                } else { // conpare all nodes are the same one
+                  long id = cans[0].v().id();
+                  int k = 1;
+                  for (; k < af_cnt; k++) {
+                    if (cans[k].v().id() != id) break;
+                  }
+                  if (k != af_cnt) {
+                    isY = false;
+                    break;
+                  }
+                }
+              }
+            } else if (type == EQ_ID) {
+              continue;
+            }
+          }
+          if (isX && isY) { find_num++;}
+          if (isX && !isY) { return false;}
+        }
+      }
+      return (find_num == 0) ? false : true;
+    }
+#endif
+
     bool checkLiteralFormat() {
       for (int i = 0; i < 2; i++) {
         vector<GED_TYPE>& types = (i == 0) ? _x_type : _y_type;
@@ -463,8 +620,8 @@ class GED {
     }
 
     void toString(string& str) {
-      str = str + "%Gid:" + gid() + "\n";
-      str = str + "%Lid:" + lid() + "\n";
+      str = str + "%GID:" + gid() + "\n";
+      str = str + "%LID:" + lid() + "\n";
       patternString(str);
       literalString(str);
     }

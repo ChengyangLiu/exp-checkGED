@@ -111,10 +111,10 @@ class Graph {
     }
 
     vector<Node>& allNodes() { return _nodes;}
-
-  private:
     /* only for existed id */
 		inline Node& node(long vid) { return _nodes[_vid_map[vid]];}
+
+  private:
     /* check exist */
     inline bool nodeExist(long vid) { return _vid_map.find(vid) != _vid_map.end() ? true : false;}
     /* given vid, return its position */

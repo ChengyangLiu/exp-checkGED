@@ -27,6 +27,8 @@ class CheckGED {
 #ifdef BOOST_GRAPH
     void convert2BG(Graph& g, vector<GED>& ged);
     void boost_vf2();
+    void boost_readMap(string& mapfile);
+    void boost_validation();
 
     inline graph_type& boost_graph() {return _boost_graph;}
     inline vector<graph_type>& boost_patterns() {return _boost_patterns;}
@@ -34,6 +36,7 @@ class CheckGED {
   private:
     graph_type _boost_graph;
     vector<graph_type> _boost_patterns;
+    vector<vector<map<long, long>>> _maps; //(pattern id, graph id)
 #endif
 
 	private:
