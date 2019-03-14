@@ -104,7 +104,7 @@ class Graph {
           }
         }
         feout.close();
-      } catch(boost::bad_lexical_cast& e) {
+      } catch(std::exception& e) {
         cout << e.what() << endl;
         exit(0);
       }

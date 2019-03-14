@@ -98,8 +98,25 @@ void CheckGED::printGEDs() {
 	cout << "Total:" << _geds.size() << "\n\n";
 	for (auto& ged:_geds) {
 		string str = "";
-		ged.toString(str);
+		ged.toString(str, false);
 		cout << str << "\n";
+	}
+}
+
+/* rewrite GEDs (vertexes start from 0 and are continous) */
+void CheckGED::reWriteGEDs(string& path) {
+	try {
+		ofstream fout(path);
+		for (auto& ged:_geds) {
+			string str = "";
+			ged.toString(str, true);
+			fout << str;
+			fout << "##############\n";
+		}
+		fout.close();
+	} catch(std::exception& e) {
+		cout << e.what() << endl;
+		exit(0);
 	}
 }
 
@@ -270,7 +287,7 @@ void CheckGED::writeValidatedGEDs(const string& gedpath) {
 	for (int i = 0; i < cnt; i++) {
 		if (_active[i]) {
 			string res = "";
-			_geds[i].toString(res);
+			_geds[i].toString(res, false);
 			fout << res;
 		}
 	}
@@ -366,21 +383,27 @@ int main(int argc, char **argv) {
 		int frag_num = atoi(argv[3]);
 		CheckGED cg;
 		cg.delivery(gedpath, frag_num);
-	} else if (mode == 3) { //rewrite Graph ./checkGED 3 $Graph_file
-		if (argc < 3) {
+	} else if (mode == 3) { //rewrite Graph and GEDs ./checkGED 3 $Graph_file $GEDs_path
+		if (argc < 4) {
 			cout << "Missing Parameters!" << endl;
 			exit(0);
 		}
 		filename = argv[2];
+		gedpath = argv[3];
 
 		CheckGED cg;
 		Graph& g = cg.graph();
-
 		cg.loadGraph(filename);
-		cg.printGraph();
+		//cg.printGraph();
 		// rewrite graph, make vertices start from id 0 and continous.
 		string repath = filename + ".remap";
 		g.rewriteGraph(repath);
+
+		cg.loadGEDs(gedpath);
+		//cg.printGEDs();
+		// rewrite GEDs, make vertices start from id 0 and continous.
+		repath = gedpath + ".remap";
+		cg.reWriteGEDs(repath);
 	}
 #ifdef BOOST_GRAPH
 	else if (mode == 4) { //must excute after boost_vf2

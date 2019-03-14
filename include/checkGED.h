@@ -20,6 +20,7 @@ class CheckGED {
       cout << res;
     }
 		void printGEDs();
+    void reWriteGEDs(string& path);
 		void validation();
 		void writeValidatedGEDs(const string& gedpath);
     void delivery(string& gedpath, int frag_num);

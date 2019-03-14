@@ -89,13 +89,18 @@ class GED {
     inline string& gid() {return _gid;}
     inline string& lid() {return _lid;}
 
-    void patternString(string& str) {
+    void patternString(string& str, bool remap) {
       try {
         for(auto& node:_nodes) {
           Vertex& vertex = node.v();
           string value = vertex.value();
-          str = str + "v\t" + boost::lexical_cast<string>(vertex.id()) + "\t"
-          + boost::lexical_cast<string>(vertex.label()) + "\t" + vertex.value() + "\n";
+          if (remap) {
+            str = str + "v\t" + boost::lexical_cast<string>(GED::pos(vertex.id())) + "\t"
+            + boost::lexical_cast<string>(vertex.label()) + "\t" + vertex.value() + "\n";
+          } else {
+            str = str + "v\t" + boost::lexical_cast<string>(vertex.id()) + "\t"
+            + boost::lexical_cast<string>(vertex.label()) + "\t" + vertex.value() + "\n";
+          }
         }
         for(auto& node:_nodes) {
           vector<long>& neighbors = node.neighbors();
@@ -103,8 +108,13 @@ class GED {
           int len = neighbors.size();
           for(int i = 0; i < len; i++) {
             Vertex& dst = GED::node(neighbors[i]).v();
-            str = str + "e\t" + boost::lexical_cast<string>(node.v().id()) + "\t{"
-            + boost::lexical_cast<string>(elabels[i]) + "}\t" + boost::lexical_cast<string>(dst.id()) + "\n";
+            if (remap) {
+              str = str + "e\t" + boost::lexical_cast<string>(GED::pos(node.v().id())) + "\t"
+              + boost::lexical_cast<string>(elabels[i]) + "\t" + boost::lexical_cast<string>(GED::pos(dst.id())) + "\n";
+            } else {
+              str = str + "e\t" + boost::lexical_cast<string>(node.v().id()) + "\t"
+              + boost::lexical_cast<string>(elabels[i]) + "\t" + boost::lexical_cast<string>(dst.id()) + "\n";
+            }
           }
         }
       } catch(boost::bad_lexical_cast& e) {
@@ -113,40 +123,80 @@ class GED {
       }
     }
 
-    void literalString(string& str) {
+    void literalString(string& str, bool remap) {
       str += "%X\n";
       map<long, string>::iterator it = _x_matches.begin();
       try {
-        for (auto type:_x_type) {
-          if (type == EQ_LET) {
-            str += "eq-let\t" + boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\n";
-          } else if (type == EQ_VAR) {
-            str += "eq-var\t" + boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\t";
-            str += boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\n";
-          } else if (type == EQ_ID) {
-            str += "eq-id\t" + boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\t";
-            str += boost::lexical_cast<string>((it++)->first) + "\n";
+        if (remap) {
+          for (auto type:_x_type) {
+            if (type == EQ_LET) {
+              str += "eq-let\t" + boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_VAR) {
+              str += "eq-var\t" + boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_ID) {
+              str += "eq-id\t" + boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\n";
+            }
+          }
+        } else {
+          for (auto type:_x_type) {
+            if (type == EQ_LET) {
+              str += "eq-let\t" + boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_VAR) {
+              str += "eq-var\t" + boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_ID) {
+              str += "eq-id\t" + boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\n";
+            }
           }
         }
         str += "%Y\n";
         it = _y_matches.begin();
-        for (auto type:_y_type) {
-          if (type == EQ_LET) {
-            str += "eq-let\t" + boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\n";
-          } else if (type == EQ_VAR) {
-            str += "eq-var\t" + boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\t";
-            str += boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\n";
-          } else if (type == EQ_ID) {
-            str += "eq-id\t" + boost::lexical_cast<string>(it->first) + "\t";
-            str += (it++)->second + "\t";
-            str += boost::lexical_cast<string>((it++)->first) + "\n";
+        if (remap) {
+          for (auto type:_y_type) {
+            if (type == EQ_LET) {
+              str += "eq-let\t" + boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_VAR) {
+              str += "eq-var\t" + boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_ID) {
+              str += "eq-id\t" + boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(GED::pos(it->first)) + "\t";
+              str += (it++)->second + "\n";
+            }
+          }
+        } else {
+          for (auto type:_y_type) {
+            if (type == EQ_LET) {
+              str += "eq-let\t" + boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_VAR) {
+              str += "eq-var\t" + boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\n";
+            } else if (type == EQ_ID) {
+              str += "eq-id\t" + boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\t";
+              str += boost::lexical_cast<string>(it->first) + "\t";
+              str += (it++)->second + "\n";
+            }
           }
         }
       } catch(boost::bad_lexical_cast& e) {
@@ -154,8 +204,6 @@ class GED {
         exit(0);
       }
     }
-
-
 
     bool validateGED(Graph& g) {
       vector<vector<Node>> g_cans;
@@ -446,16 +494,18 @@ class GED {
           return true;
         }
       } else { //have matches
+        vector<GED_TYPE> types;
+        map<long, string>::iterator it;
         for (auto& m:maps) {
           bool isX = true;
           bool isY = true;
-          vector<GED_TYPE>& types = _x_type;
-          map<long, string>::iterator it = _x_matches.begin();
+          types = _x_type;
+          it = _x_matches.begin();
           for (auto& type:types) { // check X
             if (type == EQ_LET) {
               long vid = it->first;
               string value = (it++)->second;
-              long gid = m.get(vid);
+              long gid = m.at(vid);
               Node& g_node = g.node(gid);
               if (g_node.v().value() != value) { // value is not equal, break
                 isX = false;
@@ -468,8 +518,8 @@ class GED {
               long b_id = it->first;
               long b_elabel = atoi((it++)->second.c_str());
               //cout << b_elabel << "\n"; //test
-              Node& g_node1 = g.node(m.get(a_id));
-              Node& g_node2 = g.node(m.get(b_id));
+              Node& g_node1 = g.node(m.at(a_id));
+              Node& g_node2 = g.node(m.at(b_id));
               if (a_elabel == -1) { //elabel = -1, compare their name
                 if (g_node1.v().value() != g_node2.v().value()) {
                   isX = false;
@@ -523,7 +573,7 @@ class GED {
             if (type == EQ_LET) {
               long vid = it->first;
               string value = (it++)->second;
-              long gid = m.get(vid);
+              long gid = m.at(vid);
               Node& g_node = g.node(gid);
               if (g_node.v().value() != value) { // value is not equal, break
                 isY = false;
@@ -536,8 +586,8 @@ class GED {
               long b_id = it->first;
               long b_elabel = atoi((it++)->second.c_str());
               //cout << b_elabel << "\n"; //test
-              Node& g_node1 = g.node(m.get(a_id));
-              Node& g_node2 = g.node(m.get(b_id));
+              Node& g_node1 = g.node(m.at(a_id));
+              Node& g_node2 = g.node(m.at(b_id));
               if (a_elabel == -1) { //elabel = -1, compare their name
                 if (g_node1.v().value() != g_node2.v().value()) {
                   isY = false;
@@ -619,11 +669,11 @@ class GED {
       return true;
     }
 
-    void toString(string& str) {
+    void toString(string& str, bool remap) {
       str = str + "%GID:" + gid() + "\n";
-      str = str + "%LID:" + lid() + "\n";
-      patternString(str);
-      literalString(str);
+      str = str + "%LID" + lid() + "\n";
+      patternString(str, remap);
+      literalString(str, remap);
     }
 
   private:
