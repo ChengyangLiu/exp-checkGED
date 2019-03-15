@@ -132,8 +132,31 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 	for (auto& n:nodes) {
 		vector<long>& eL = n.elabels();
 		vector<long>& eN = n.neighbors();
-		for (int i = 0; i < eL.size(); i++) {
-			add_edge(n.v().id(), eN[i], edge_property(eL[i]), _boost_graph);
+		cout << "ID:" << n.v().id() << "\n";
+		if (eL.size() == 1) {
+			vector<long> edge_pro;
+			edge_pro.emplace_back(eL[0]);
+			add_edge(n.v().id(), eN[0], EdgeProperties(edge_pro), _boost_graph);
+		} else {
+			vector<pair<long, long>> edges;
+			for (int i = 0; i < eL.size(); i++) {
+				edges.emplace_back(std::make_pair(eN[i], eL[i]));
+			}
+			sort(edges.begin(), edges.end(), pairComp); // sort by dst id
+			int head = 0;
+			int tail = 1;
+			int edge_num = edges.size();
+			for (; tail <= edge_num; tail++) {
+				if (tail == edge_num || edges[head].first != edges[tail].first) {
+					vector<long> edge_pro;
+					for (; head < tail; head++) {
+						cout << "A:" << eL[head] << "," << eN[head] << "\n";
+						edge_pro.emplace_back(eL[head]);
+					}
+					add_edge(n.v().id(), eN[head-1], EdgeProperties(edge_pro), _boost_graph);
+				}
+				tail++;
+			}
 		}
 	}
 
@@ -149,9 +172,13 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 		for (auto& n:nodes) {
 			vector<long>& eL = n.elabels();
 			vector<long>& eN = n.neighbors();
+			vector<pair<long, long>> edges;
 			for (int i = 0; i < eL.size(); i++) {
-				add_edge(n.v().id(), eN[i], edge_property(eL[i]), pattern);
+				vector<long> edge_pro;
+				edge_pro.emplace_back(eL[i]);
+				add_edge(n.v().id(), eN[i], EdgeProperties(edge_pro), pattern);
 			}
+
 		}
 		_boost_patterns.emplace_back(pattern);
 	}
