@@ -175,29 +175,31 @@ void CheckGED::boost_vf2() {
 	vector<graph_type>& bps = _boost_patterns;
 	int pos = 0;
 	for (auto& bp:bps) {
-		if (_active[pos] == false) continue; //ignore filtered patterns
-		// Create the vertex binary predicate
-		vertex_comp_t vertex_comp = make_property_map_equivalent(get(boost::vertex_name, bp), get(boost::vertex_name, _boost_graph));
-	  // Create the vertex binary predicate
-	  edge_comp_t edge_comp = make_property_map_equivalent(get(boost::edge_name, bp), get(boost::edge_name, _boost_graph));
-		// Create callback
-	  my_call_back<graph_type, graph_type> callback(bp, _boost_graph);
-	  // Print out all subgraph isomorphism mappings between graph1 and graph2.
-	  // Function vertex_order_by_mult is used to compute the order of
-	  // vertices of graph1. This is the order in which the vertices are examined
-	  // during the matching process.
-	  bool flag = boost::vf2_subgraph_iso(bp, _boost_graph, std::ref(callback), vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
-		// get vector from callback
-    auto set_of_vertex_iso_map = callback.get_setvmap();
-		// store mapping
 		vector<map<long, long>> id_maps;
-		for (auto& set_of_v:set_of_vertex_iso_map) {
-			map<long, long> id_map;
-      for (auto& v:set_of_v) {
-				id_map[v.first] = v.second;
-			}
-      id_maps.emplace_back(id_map);
-    }
+		cout << "vf2 on No." << pos + 1 << " GEDs\n";
+		if (_active[pos] != false) {//ignore filtered patterns
+			// Create the vertex binary predicate
+			vertex_comp_t vertex_comp = make_property_map_equivalent(get(boost::vertex_name, bp), get(boost::vertex_name, _boost_graph));
+		  // Create the vertex binary predicate
+		  edge_comp_t edge_comp = make_property_map_equivalent(get(boost::edge_name, bp), get(boost::edge_name, _boost_graph));
+			// Create callback
+		  my_call_back<graph_type, graph_type> callback(bp, _boost_graph);
+		  // Print out all subgraph isomorphism mappings between graph1 and graph2.
+		  // Function vertex_order_by_mult is used to compute the order of
+		  // vertices of graph1. This is the order in which the vertices are examined
+		  // during the matching process.
+		  bool flag = boost::vf2_subgraph_iso(bp, _boost_graph, std::ref(callback), vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
+			// get vector from callback
+	    auto set_of_vertex_iso_map = callback.get_setvmap();
+			// store mapping
+			for (auto& set_of_v:set_of_vertex_iso_map) {
+				map<long, long> id_map;
+	      for (auto& v:set_of_v) {
+					id_map[v.first] = v.second;
+				}
+	      id_maps.emplace_back(id_map);
+	    }
+		}
 		_maps.emplace_back(id_maps);
 		pos++;
 	}
@@ -365,10 +367,10 @@ int main(int argc, char **argv) {
 		vector<GED>& geds = cg.geds();
 
 		cg.loadGraph(filename);
-		//cg.printGraph();
+		cg.printGraph();
 
 		cg.loadGEDs(gedpath);
-		//cg.printGEDs();
+		cg.printGEDs();
 
 	#ifdef BOOST_GRAPH //Graph's and GEDs' vertices must start from id 0 and continous.
 
