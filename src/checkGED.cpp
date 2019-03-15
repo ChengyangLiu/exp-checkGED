@@ -44,7 +44,7 @@ void CheckGED::loadGEDs(const string& gedpath) {
 				//cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst << "\n";
 				if (!_geds[cnt-1].addE(src, boost::lexical_cast<long>(label), dst)) {
 					cout << "GED V ID does not exist, in GED " << cnt << " in File " << gedpath << "\n";
-					exit(0);
+					exit(1);
 				}
 			} else if (line[0] == '%' && line[1] == 'X') { //X?
 				isX = true;
@@ -87,10 +87,10 @@ void CheckGED::loadGEDs(const string& gedpath) {
 		}
 	} catch(boost::bad_lexical_cast& e) {
 		cout << "GEDReadingError in GED NO." << (cnt-1) << ": " << e.what() << "\n";
-		exit(0);
+		exit(1);
 	} catch (std::exception& e) {
 		cout << e.what() << "\n";
-		exit(0);
+		exit(1);
 	}
 }
 
@@ -116,14 +116,14 @@ void CheckGED::reWriteGEDs(string& path) {
 		fout.close();
 	} catch(std::exception& e) {
 		cout << e.what() << endl;
-		exit(0);
+		exit(1);
 	}
 }
 
 #ifdef BOOST_GRAPH
 
 /* CAUTION: the graph's and GEDs' id must start from 0 and be continous!
- * There is only one edge between two vertexes!
+ * FIXME: There is only one edge between two vertexes!
  */
 void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 	// Add vertices...
@@ -164,56 +164,50 @@ void CheckGED::boost_vf2() {
 	vector<graph_type>& bps = _boost_patterns;
 	int cnt = 0;
 	for (auto& bp:bps) {
-		cout << "#" << ++cnt << ":\n";
 		// Create the vertex binary predicate
 		vertex_comp_t vertex_comp = make_property_map_equivalent(get(boost::vertex_name, bp), get(boost::vertex_name, _boost_graph));
 	  // Create the vertex binary predicate
 	  edge_comp_t edge_comp = make_property_map_equivalent(get(boost::edge_name, bp), get(boost::edge_name, _boost_graph));
 		// Create callback
-	  boost::vf2_print_callback<graph_type, graph_type> callback(bp, _boost_graph);
+	  my_call_back<graph_type, graph_type> callback(bp, _boost_graph);
 	  // Print out all subgraph isomorphism mappings between graph1 and graph2.
 	  // Function vertex_order_by_mult is used to compute the order of
 	  // vertices of graph1. This is the order in which the vertices are examined
 	  // during the matching process.
-	  bool flag = boost::vf2_subgraph_iso(bp, _boost_graph, callback, vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
-		cout << "$" << "\n";
+	  bool flag = boost::vf2_subgraph_iso(bp, _boost_graph, std::ref(callback), vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
+		// get vector from callback
+    auto set_of_vertex_iso_map = callback.get_setvmap();
+		// store mapping
+		vector<map<long, long>> id_maps;
+		for (auto& set_of_v:set_of_vertex_iso_map) {
+			map<long, long> id_map;
+      for (auto& v:set_of_v) {
+				id_map[v.first] = v.second;
+			}
+      id_maps.emplace_back(id_map);
+    }
+		_maps.emplace_back(id_maps);
 	}
 }
 
-void CheckGED::boost_readMap(string& mapfile) {
-	string line = "";
-	int cnt = 0;
-	try{
-		ifstream fin(mapfile);
-		while(getline(fin, line)) {
-			if (line.length() < 1) continue;
-			if (line[0] == '#') {
-				//cout << "#" << ++cnt << ":\n"; test
-				vector<map<long, long>> id_maps;
-				while (true) {
-					getline(fin, line);
-					if (line[0] == '$') break;
-					map<long, long> id_map;
-					vector<string> details;
-					boost::split(details, line, boost::is_any_of("("));
-					for (int i = 1; i < details.size(); i++) {
-						//cout << details[i] << "\n"; test
-						vector<string> map;
-						boost::split(map, details[i], boost::is_any_of(","));
-						//cout << map[0] << "\n" << map[1] << "\n"; test
-						long p_id = boost::lexical_cast<long>(map[0]);
-						long g_id = boost::lexical_cast<long>(map[1].substr(1, map[1].length()-3));
-						//cout << p_id << "," << g_id << "\n"; //test
-						id_map[p_id] = g_id;
-					}
-					id_maps.emplace_back(id_map);
+void CheckGED::boost_writeMapping(string& mapfile) {
+	try {
+		ofstream fout(mapfile);
+		int id = 0;
+    for (auto& set_of_v:_maps) {
+			fout << "#" << ++id << ":\n";
+      for (auto& vs:set_of_v) {
+				for (auto& v:vs) {
+					fout << "(" << v.first << "," << v.second << ")" << "\t";
 				}
-				_maps.emplace_back(id_maps);
+				fout << "\n";
 			}
-		}
-	} catch (std::exception& e) {
-		cout << e.what() << "\n";
-		exit(0);
+			fout << "$" << "\n";
+    }
+		fout.close();
+	} catch(std::exception& e) {
+		cout << e.what() << endl;
+		exit(1);
 	}
 }
 
@@ -331,7 +325,7 @@ void CheckGED::delivery(string& gedpath, int frag_num) {
 		}
   } catch (std::exception& e) {
 		cout << e.what();
-		exit(0);
+		exit(1);
 	}
 }
 
@@ -342,13 +336,13 @@ int main(int argc, char **argv) {
 	string gedpath = "";
 	if (argc < 2) {
 		cout << "Missing Parameters!" << endl;
-		exit(0);
+		exit(1);
 	}
 	mode = atoi(argv[1]);
 	if (mode == 1) { //validate GEDs  ./checkGED 1 $Graph_file $GED_path
 		if (argc < 4) {
 			cout << "Missing Parameters!" << endl;
-			exit(0);
+			exit(1);
 		}
 		filename = argv[2];
 		gedpath = argv[3];
@@ -363,9 +357,20 @@ int main(int argc, char **argv) {
 		cg.loadGEDs(gedpath);
 		//cg.printGEDs();
 
-	#ifdef BOOST_GRAPH //print out the pattern matches info
+	#ifdef BOOST_GRAPH //Graph's and GEDs' vertices must start from id 0 and continous.
+
+		string mapfile = gedpath + ".map";
+		string resfile = gedpath + ".vali";
+		//convert graph and geds to boost graph format
 		cg.convert2BG(g, geds);
+		//use boost vf2 to produce mapping from GEDs to Graph
 		cg.boost_vf2();
+		//write mapping from GEDs to Graph
+		cg.boost_writeMapping(mapfile);
+		//validate literals
+		cg.boost_validation();
+		//write results
+	  cg.writeValidatedGEDs(resfile);
 	#else
 	  //validate
 	  cg.validation();
@@ -376,7 +381,7 @@ int main(int argc, char **argv) {
 	} else if (mode == 2) { //cut GEDs ./checkGED 2 $GED_path NUM
 		if (argc < 4) {
 			cout << "Missing Parameters!" << endl;
-			exit(0);
+			exit(1);
 		}
 		gedpath = argv[2];
 
@@ -386,7 +391,7 @@ int main(int argc, char **argv) {
 	} else if (mode == 3) { //rewrite Graph and GEDs ./checkGED 3 $Graph_file $GEDs_path
 		if (argc < 4) {
 			cout << "Missing Parameters!" << endl;
-			exit(0);
+			exit(1);
 		}
 		filename = argv[2];
 		gedpath = argv[3];
@@ -405,30 +410,6 @@ int main(int argc, char **argv) {
 		repath = gedpath + ".remap";
 		cg.reWriteGEDs(repath);
 	}
-#ifdef BOOST_GRAPH
-	else if (mode == 4) { //must excute after boost_vf2
-		if (argc < 4) {
-			cout << "Missing Parameters!" << endl;
-			exit(0);
-		}
-		filename = argv[2];
-		gedpath = argv[3];
 
-		CheckGED cg;
-		Graph& g = cg.graph();
-		vector<GED>& geds = cg.geds();
-		cg.loadGraph(filename);
-		//cg.printGraph();
-		cg.loadGEDs(gedpath);
-		//cg.printGEDs();
-
-    string mapfile = gedpath + ".map";
-		cg.boost_readMap(mapfile);
-		cg.boost_validation();
-		string resfile = gedpath + ".vali";
-	  cg.writeValidatedGEDs(resfile);
-	}
-#endif
-
-	return 1;
+	return 0;
 }

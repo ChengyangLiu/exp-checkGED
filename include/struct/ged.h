@@ -119,7 +119,7 @@ class GED {
         }
       } catch(boost::bad_lexical_cast& e) {
         cout << "PatternStringError: " << e.what() << "\n";
-        exit(0);
+        exit(1);
       }
     }
 
@@ -201,7 +201,7 @@ class GED {
         }
       } catch(boost::bad_lexical_cast& e) {
         cout << "LiteralStringError: " << e.what() << "\n";
-        exit(0);
+        exit(1);
       }
     }
 

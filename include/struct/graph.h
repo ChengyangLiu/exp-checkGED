@@ -41,18 +41,18 @@ class Graph {
           line_cnt++;
           if (!Graph::nodeExist(src)) {
             cout << "Vertex ID: " << src << " does not exist, Line " << line_cnt << " in File " << filename << ".e\n";
-            exit(0);
+            exit(1);
           }
           if (!Graph::nodeExist(dst)) {
             cout << "Vertex ID: " << dst << " does not exist, Line " << line_cnt << " in File " << filename << ".e\n";
-            exit(0);
+            exit(1);
           }
           Node& node = Graph::node(src);
           node.addNeighbor(dst, label);
         }
       } catch (exception& e) {
         cout << e.what();
-        exit(0);
+        exit(1);
       }
     }
 
@@ -78,7 +78,7 @@ class Graph {
         }
       } catch(boost::bad_lexical_cast& e) {
         cout << e.what() << endl;
-        exit(0);
+        exit(1);
       }
     }
 
@@ -106,7 +106,7 @@ class Graph {
         feout.close();
       } catch(std::exception& e) {
         cout << e.what() << endl;
-        exit(0);
+        exit(1);
       }
     }
 
