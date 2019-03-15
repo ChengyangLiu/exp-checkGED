@@ -158,7 +158,17 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 }
 
 void CheckGED::boost_filter() {
-
+	for (int i = 0; i < _geds.size(); i++) {
+		int num = 0;
+		vector<Node>& nodes = _geds[i].pattern();
+		for (auto& node:nodes) {
+			vector<long>& neighbors = node.neighbors();
+			num += neighbors.size();
+		}
+		if (num == 0) {
+			_active[i] = false;
+		}
+	}
 }
 
 void CheckGED::boost_vf2() {
