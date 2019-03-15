@@ -122,9 +122,6 @@ void CheckGED::reWriteGEDs(string& path) {
 
 #ifdef BOOST_GRAPH
 
-/* CAUTION: the graph's and GEDs' id must start from 0 and be continous!
- * FIXME: There is only one edge between two vertexes!
- */
 void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 	// Add vertices...
 	vector<Node>& nodes = g.allNodes();
@@ -160,10 +157,15 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 	}
 }
 
+void CheckGED::boost_filter() {
+
+}
+
 void CheckGED::boost_vf2() {
 	vector<graph_type>& bps = _boost_patterns;
-	int cnt = 0;
+	int pos = 0;
 	for (auto& bp:bps) {
+		if (_active[pos] == false) continue; //ignore filtered patterns
 		// Create the vertex binary predicate
 		vertex_comp_t vertex_comp = make_property_map_equivalent(get(boost::vertex_name, bp), get(boost::vertex_name, _boost_graph));
 	  // Create the vertex binary predicate
@@ -187,6 +189,7 @@ void CheckGED::boost_vf2() {
       id_maps.emplace_back(id_map);
     }
 		_maps.emplace_back(id_maps);
+		pos++;
 	}
 }
 
@@ -363,6 +366,8 @@ int main(int argc, char **argv) {
 		string resfile = gedpath + ".vali";
 		//convert graph and geds to boost graph format
 		cg.convert2BG(g, geds);
+		//filter unexpected GEDs
+		cg.boost_filter();
 		//use boost vf2 to produce mapping from GEDs to Graph
 		cg.boost_vf2();
 		//write mapping from GEDs to Graph

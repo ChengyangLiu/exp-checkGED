@@ -8,6 +8,7 @@ enum GED_TYPE {
   EQ_ID = 2,
 };
 
+/* check whether 2 vector do not have intersection */
 template <typename T>
 bool const interEmpty (vector<T> const& a, vector<T> const& b) {
   for (int i = 0; i < a.size(); i++) {
@@ -35,6 +36,7 @@ typedef boost::property_map_equivalent<vertex_name_map_t, vertex_name_map_t> ver
 typedef boost::property_map<graph_type, boost::edge_name_t>::type edge_name_map_t;
 typedef boost::property_map_equivalent<edge_name_map_t, edge_name_map_t> edge_comp_t;
 
+/* my call back, to contain the output in vf2_subgraph_iso */
 template <typename Graph1, typename Graph2>
 class my_call_back {
 

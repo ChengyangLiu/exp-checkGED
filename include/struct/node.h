@@ -40,6 +40,7 @@ class Node {
       }
     }
 
+    /* get all nodes in given graph whose states are the same with present node */
     void getIsomorNodes (vector<Node>& g, vector<Node>& isomor_nodes) {
       // check self
       vector<Node> t1;
@@ -87,6 +88,7 @@ class Node {
       }
     }
 
+    /* get its parents and elabels by given id */
     void getParents(vector<Node>& g, const long id, vector<Node>& parents, vector<long>& elabels) {
       for (auto& n:g) {
         vector<long>& n_neighbors = n.neighbors();

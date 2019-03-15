@@ -89,6 +89,7 @@ class GED {
     inline string& gid() {return _gid;}
     inline string& lid() {return _lid;}
 
+    /* get pattern string */
     void patternString(string& str, bool remap) {
       try {
         for(auto& node:_nodes) {
@@ -123,6 +124,7 @@ class GED {
       }
     }
 
+    /* get literal string */
     void literalString(string& str, bool remap) {
       str += "%X\n";
       map<long, string>::iterator it = _x_matches.begin();
@@ -205,6 +207,7 @@ class GED {
       }
     }
 
+    /* validate GED */
     bool validateGED(Graph& g) {
       vector<vector<Node>> g_cans;
       vector<Node>& g_allNodes = g.allNodes();
@@ -485,6 +488,7 @@ class GED {
     }
 
 #ifdef BOOST_GRAPH
+    /* validate GED using mapping results of boost vf2 */
     bool validateGED(Graph& g, vector<map<long, long>>& maps) {
       int find_num = 0;
       if (maps.size() == 0) { //do not have matches
@@ -644,6 +648,7 @@ class GED {
     }
 #endif
 
+    /* check whether the format of literal is correct */
     bool checkLiteralFormat() {
       for (int i = 0; i < 2; i++) {
         vector<GED_TYPE>& types = (i == 0) ? _x_type : _y_type;
@@ -677,6 +682,7 @@ class GED {
     }
 
   private:
+    /* get node by given vid, only for existed id */
     inline Node& node(long vid) { return _nodes[_id_map[vid]];}
     /* check exist */
     inline bool nodeExist(long vid) { return _id_map.find(vid) != _id_map.end() ? true : false;}
