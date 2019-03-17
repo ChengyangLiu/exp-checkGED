@@ -33,21 +33,10 @@ bool pairComp(const pair<long, long>& a, const pair<long, long>& b){
 #include <boost/graph/graph_utility.hpp>
 
 // Define edge and vertex properties
-typedef boost::property<boost::edge_name_t, long> edge_property;
-typedef boost::property<boost::vertex_name_t, long, boost::property<boost::vertex_index_t, int> > vertex_property;
-// Using a vecS graphs => the index maps are implicit.
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, vertex_property, edge_property> graph_type;
-
-typedef boost::property_map<graph_type, boost::vertex_name_t>::type vertex_name_map_t;
-typedef boost::property_map_equivalent<vertex_name_map_t, vertex_name_map_t> vertex_comp_t;
-typedef boost::property_map<graph_type, boost::edge_name_t>::type edge_name_map_t;
-typedef boost::property_map_equivalent<edge_name_map_t, edge_name_map_t> edge_comp_t;
-
 // EdgeProperties
-class EdgeProperties: public edge_property {
-  public:
+struct  EdgeProperties {
+    EdgeProperties() {}
     EdgeProperties(vector<long> elabels) :_elabels(elabels) {}
-
     /* overload == */
     bool operator==(EdgeProperties const& other) const {
       for (auto& my_l:_elabels) {
@@ -57,9 +46,26 @@ class EdgeProperties: public edge_property {
       }
       return false;
     }
-  private :
     vector<long> _elabels;
 };
+
+//VertexProperties
+/*struct VertexProperties {
+    VertexProperties() {}
+    VertexProperties(long vlabel) :_vlabel(vlabel) {}
+    long _vlabel;
+};*/
+
+typedef boost::property<boost::vertex_name_t, long, boost::property<boost::vertex_index_t, int> > vertex_property;
+typedef boost::property<boost::edge_name_t, EdgeProperties> edge_property;
+
+// Using a vecS graphs => the index maps are implicit.
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, vertex_property, edge_property> graph_type;
+
+typedef boost::property_map<graph_type, boost::vertex_name_t>::type vertex_name_map_t;
+typedef boost::property_map_equivalent<vertex_name_map_t, vertex_name_map_t> vertex_comp_t;
+typedef boost::property_map<graph_type, boost::edge_name_t>::type edge_name_map_t;
+typedef boost::property_map_equivalent<edge_name_map_t, edge_name_map_t> edge_comp_t;
 
 /* my call back, to contain the output in vf2_subgraph_iso */
 template <typename Graph1, typename Graph2>

@@ -12,11 +12,11 @@ GED_REMAP_FIEL=$GED_FILE".remap"       # ged map
 GED_LOG=$GED_REMAP_FIEL".log"    # geds' literals check log
 
 cd $ROOT
-rm -rf ./build || true
-mkdir build
+#rm -rf ./build || true
+#mkdir build
 cd build
-cmake -DBOOST_GRAPH=TRUE ..
-make
+#cmake -DBOOST_GRAPH=TRUE ..
+#make
 
 REMAP="./exp-checkGED 3 $GRAPH_FILE $GED_FILE"
 BOOST_VF2="nohup ./exp-checkGED 1 $GRAPH_REMAP_FIEL $GED_REMAP_FIEL >$GED_LOG 2>&1 &"

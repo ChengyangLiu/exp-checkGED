@@ -132,11 +132,11 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 	for (auto& n:nodes) {
 		vector<long>& eL = n.elabels();
 		vector<long>& eN = n.neighbors();
-		cout << "ID:" << n.v().id() << "\n";
+		//cout << "ID:" << n.v().id() << "\n"; //test
 		if (eL.size() == 1) {
 			vector<long> edge_pro;
 			edge_pro.emplace_back(eL[0]);
-			add_edge(n.v().id(), eN[0], EdgeProperties(edge_pro), _boost_graph);
+			add_edge(n.v().id(), eN[0], edge_property(edge_pro), _boost_graph);
 		} else {
 			vector<pair<long, long>> edges;
 			for (int i = 0; i < eL.size(); i++) {
@@ -146,16 +146,16 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 			int head = 0;
 			int tail = 1;
 			int edge_num = edges.size();
+                        //cout << "B:" << edge_num << "\n"; //test
 			for (; tail <= edge_num; tail++) {
 				if (tail == edge_num || edges[head].first != edges[tail].first) {
 					vector<long> edge_pro;
 					for (; head < tail; head++) {
-						cout << "A:" << eL[head] << "," << eN[head] << "\n";
+						//cout << "A:" << eL[head] << "," << eN[head] << "\n"; //test
 						edge_pro.emplace_back(eL[head]);
 					}
-					add_edge(n.v().id(), eN[head-1], EdgeProperties(edge_pro), _boost_graph);
+					add_edge(n.v().id(), eN[head-1], edge_property(edge_pro), _boost_graph);
 				}
-				tail++;
 			}
 		}
 	}
@@ -176,7 +176,7 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 			for (int i = 0; i < eL.size(); i++) {
 				vector<long> edge_pro;
 				edge_pro.emplace_back(eL[i]);
-				add_edge(n.v().id(), eN[i], EdgeProperties(edge_pro), pattern);
+				add_edge(n.v().id(), eN[i], edge_property(edge_pro), pattern);
 			}
 
 		}
@@ -188,11 +188,13 @@ void CheckGED::boost_filter() {
 	for (int i = 0; i < _geds.size(); i++) {
 		int num = 0;
 		vector<Node>& nodes = _geds[i].pattern();
+                int node_num = nodes.size();
 		for (auto& node:nodes) {
 			vector<long>& neighbors = node.neighbors();
 			num += neighbors.size();
 		}
-		if (num == 0) {
+                // TODO:filter independent node situation
+		if (num == 0 || num + 1 < node_num) {
 			_active[i] = false;
 		}
 	}
@@ -325,6 +327,7 @@ void CheckGED::writeValidatedGEDs(const string& gedpath) {
 			string res = "";
 			_geds[i].toString(res, false);
 			fout << res;
+                        fout << "##############\n";
 		}
 	}
 	fout.close();

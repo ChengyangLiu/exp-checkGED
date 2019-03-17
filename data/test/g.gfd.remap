@@ -1,0 +1,474 @@
+%GID:0
+%LID0#0-1-c#0#0#0
+v	0	0	ANY
+v	1	2	ANY
+e	0	3	1
+%X
+%Y
+eq-let	1	c
+##############
+%GID:0
+%LID0#0-0-a#0#0#1
+v	0	0	ANY
+v	1	2	ANY
+e	0	3	1
+%X
+%Y
+eq-let	0	a
+##############
+%GID:1
+%LID0#1-1-a#0#0#0
+v	0	0	ANY
+v	1	1	ANY
+e	0	3	1
+%X
+%Y
+eq-let	1	a
+##############
+%GID:1
+%LID0#1-0-1-1#0#0#2
+v	0	0	ANY
+v	1	1	ANY
+e	0	3	1
+%X
+%Y
+eq-var	0	-1	1	-1
+##############
+%GID:1
+%LID0#1-0-a#0#0#1
+v	0	0	ANY
+v	1	1	ANY
+e	0	3	1
+%X
+%Y
+eq-let	0	a
+##############
+%GID:2
+%LID0#2-1-a#0#0#0
+v	0	1	ANY
+v	1	0	ANY
+e	0	3	1
+%X
+%Y
+eq-let	1	a
+##############
+%GID:2
+%LID0#2-0-2-1#0#0#2
+v	0	1	ANY
+v	1	0	ANY
+e	0	3	1
+%X
+%Y
+eq-var	0	-1	1	-1
+##############
+%GID:2
+%LID0#2-0-a#0#0#1
+v	0	1	ANY
+v	1	0	ANY
+e	0	3	1
+%X
+%Y
+eq-let	0	a
+##############
+%GID:3
+%LID0#3-1-a#0#0#0
+v	0	0	ANY
+v	1	0	ANY
+v	2	1	ANY
+e	0	3	2
+e	2	3	1
+%X
+%Y
+eq-let	2	a
+##############
+%GID:3
+%LID0#3-0-a#0#0#2
+v	0	0	ANY
+v	1	0	ANY
+v	2	1	ANY
+e	0	3	2
+e	2	3	1
+%X
+%Y
+eq-let	0	a
+##############
+%GID:3
+%LID0#3-1-3-2#0#0#4
+v	0	0	ANY
+v	1	0	ANY
+v	2	1	ANY
+e	0	3	2
+e	2	3	1
+%X
+%Y
+eq-var	2	-1	1	-1
+##############
+%GID:3
+%LID0#3-2-a#0#0#1
+v	0	0	ANY
+v	1	0	ANY
+v	2	1	ANY
+e	0	3	2
+e	2	3	1
+%X
+%Y
+eq-let	1	a
+##############
+%GID:3
+%LID0#3-0-3-1#0#0#3
+v	0	0	ANY
+v	1	0	ANY
+v	2	1	ANY
+e	0	3	2
+e	2	3	1
+%X
+%Y
+eq-var	0	-1	2	-1
+##############
+%GID:3
+%LID0#3-0-3-2#0#0#5
+v	0	0	ANY
+v	1	0	ANY
+v	2	1	ANY
+e	0	3	2
+e	2	3	1
+%X
+%Y
+eq-var	0	-1	1	-1
+##############
+%GID:4
+%LID0#4-1-a#0#0#0
+v	0	0	ANY
+v	1	2	ANY
+v	2	1	ANY
+e	0	3	2
+e	0	3	1
+%X
+%Y
+eq-let	2	a
+##############
+%GID:4
+%LID0#4-0-a#0#0#2
+v	0	0	ANY
+v	1	2	ANY
+v	2	1	ANY
+e	0	3	2
+e	0	3	1
+%X
+%Y
+eq-let	0	a
+##############
+%GID:4
+%LID0#4-2-c#0#0#1
+v	0	0	ANY
+v	1	2	ANY
+v	2	1	ANY
+e	0	3	2
+e	0	3	1
+%X
+%Y
+eq-let	1	c
+##############
+%GID:4
+%LID0#4-0-4-1#0#0#3
+v	0	0	ANY
+v	1	2	ANY
+v	2	1	ANY
+e	0	3	2
+e	0	3	1
+%X
+%Y
+eq-var	0	-1	2	-1
+##############
+%GID:5
+%LID0#5-1-a#0#0#0
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-let	2	a
+##############
+%GID:5
+%LID0#5-0-a#0#0#2
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-let	0	a
+##############
+%GID:5
+%LID0#5-1-5-2#0#0#4
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-var	2	-1	1	-1
+##############
+%GID:5
+%LID0#5-2-a#0#0#1
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-let	1	a
+##############
+%GID:5
+%LID0#5-0-5-1#0#0#3
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-var	0	-1	2	-1
+##############
+%GID:5
+%LID0#5-0-5-2#0#0#5
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-var	0	-1	1	-1
+##############
+%GID:6
+%LID0#6-2-a#0#0#0
+v	0	0	ANY
+v	1	1	ANY
+v	2	2	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-let	1	a
+##############
+%GID:6
+%LID0#6-0-a#0#0#2
+v	0	0	ANY
+v	1	1	ANY
+v	2	2	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-let	0	a
+##############
+%GID:6
+%LID0#6-1-c#0#0#1
+v	0	0	ANY
+v	1	1	ANY
+v	2	2	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-let	2	c
+##############
+%GID:6
+%LID0#6-0-6-2#0#0#3
+v	0	0	ANY
+v	1	1	ANY
+v	2	2	ANY
+e	0	3	2
+e	1	3	0
+%X
+%Y
+eq-var	0	-1	1	-1
+##############
+%GID:7
+%LID0#7-1-a#0#0#0
+v	0	0	ANY
+v	1	1	ANY
+v	2	0	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	1	3	2
+%X
+%Y
+eq-let	1	a
+##############
+%GID:7
+%LID0#7-3-a#0#0#2
+v	0	0	ANY
+v	1	1	ANY
+v	2	0	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	1	3	2
+%X
+%Y
+eq-let	2	a
+##############
+%GID:7
+%LID0#7-0-7-3#0#0#6
+v	0	0	ANY
+v	1	1	ANY
+v	2	0	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	1	3	2
+%X
+%Y
+eq-var	0	-1	2	-1
+##############
+%GID:7
+%LID0#7-0-a#0#0#4
+v	0	0	ANY
+v	1	1	ANY
+v	2	0	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	1	3	2
+%X
+%Y
+eq-let	0	a
+##############
+%GID:7
+%LID0#7-1-7-3#0#0#1
+v	0	0	ANY
+v	1	1	ANY
+v	2	0	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	1	3	2
+%X
+%Y
+eq-var	1	-1	2	-1
+##############
+%GID:7
+%LID0#7-2-c#0#0#3
+v	0	0	ANY
+v	1	1	ANY
+v	2	0	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	1	3	2
+%X
+%Y
+eq-let	3	c
+##############
+%GID:7
+%LID0#7-0-7-1#0#0#5
+v	0	0	ANY
+v	1	1	ANY
+v	2	0	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	1	3	2
+%X
+%Y
+eq-var	0	-1	1	-1
+##############
+%GID:8
+%LID0#8-1-a#0#0#0
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	2	3	0
+%X
+%Y
+eq-let	1	a
+##############
+%GID:8
+%LID0#8-3-a#0#0#2
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	2	3	0
+%X
+%Y
+eq-let	2	a
+##############
+%GID:8
+%LID0#8-0-8-3#0#0#6
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	2	3	0
+%X
+%Y
+eq-var	0	-1	2	-1
+##############
+%GID:8
+%LID0#8-0-a#0#0#4
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	2	3	0
+%X
+%Y
+eq-let	0	a
+##############
+%GID:8
+%LID0#8-1-8-3#0#0#1
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	2	3	0
+%X
+%Y
+eq-var	1	-1	2	-1
+##############
+%GID:8
+%LID0#8-2-c#0#0#3
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	2	3	0
+%X
+%Y
+eq-let	3	c
+##############
+%GID:8
+%LID0#8-0-8-1#0#0#5
+v	0	0	ANY
+v	1	1	ANY
+v	2	1	ANY
+v	3	2	ANY
+e	0	3	1
+e	0	3	3
+e	2	3	0
+%X
+%Y
+eq-var	0	-1	1	-1
+##############
