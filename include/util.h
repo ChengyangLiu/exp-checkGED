@@ -21,7 +21,7 @@ bool const interEmpty (vector<T> const& a, vector<T> const& b) {
   return true;
 }
 
-bool pairComp(const pair<long, long>& a, const pair<long, long>& b){
+bool pairComp(const pair<long, long>& a, const pair<long, long>& b) {
   return a.first < b.first;
 }
 

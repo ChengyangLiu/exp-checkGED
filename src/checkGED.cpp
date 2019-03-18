@@ -146,7 +146,7 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 			int head = 0;
 			int tail = 1;
 			int edge_num = edges.size();
-                        //cout << "B:" << edge_num << "\n"; //test
+      //cout << "B:" << edge_num << "\n"; //test
 			for (; tail <= edge_num; tail++) {
 				if (tail == edge_num || edges[head].first != edges[tail].first) {
 					vector<long> edge_pro;
@@ -188,12 +188,12 @@ void CheckGED::boost_filter() {
 	for (int i = 0; i < _geds.size(); i++) {
 		int num = 0;
 		vector<Node>& nodes = _geds[i].pattern();
-                int node_num = nodes.size();
+    int node_num = nodes.size();
 		for (auto& node:nodes) {
 			vector<long>& neighbors = node.neighbors();
 			num += neighbors.size();
 		}
-                // TODO:filter independent node situation
+    // TODO:filter independent node situation
 		if (num == 0 || num + 1 < node_num) {
 			_active[i] = false;
 		}
