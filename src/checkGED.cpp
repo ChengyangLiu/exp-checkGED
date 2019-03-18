@@ -327,7 +327,7 @@ void CheckGED::writeValidatedGEDs(const string& gedpath) {
 			string res = "";
 			_geds[i].toString(res, false);
 			fout << res;
-                        fout << "##############\n";
+      fout << "##############\n";
 		}
 	}
 	fout.close();

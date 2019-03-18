@@ -36,7 +36,10 @@ class CheckGED {
 
 #ifdef BOOST_GRAPH
 /* CAUTION: the graph's and GEDs' id must start from 0 and be continous!
- * FIXME: There is only one edge between two vertexes!
+ * Support multi-elabels but only one vlabel.
+ * BUG: Maybe boost vf2 bug. self-loops leads to wrong match.
+ * For example: P1:0(a)-{b}->1(a),0(a)-{c}->0(a) can match G:0(a)-{b}->1(a),0(a)-{c}->0(a),0(a)-{b}->2(a);
+ * but P2:0(a)-{b}->1(a) can not match G.
  */
 
     /* convert GEDs and Graph into boost graph */

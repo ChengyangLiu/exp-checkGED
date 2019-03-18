@@ -36,6 +36,7 @@ bool pairComp(const pair<long, long>& a, const pair<long, long>& b) {
 // EdgeProperties
 struct  EdgeProperties {
     EdgeProperties() {}
+    EdgeProperties(long elabel) { _elabels.emplace_back(elabel);}
     EdgeProperties(vector<long> elabels) :_elabels(elabels) {}
     /* overload == */
     bool operator==(EdgeProperties const& other) const {

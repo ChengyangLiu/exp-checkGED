@@ -491,10 +491,11 @@ class GED {
     /* validate GED using mapping results of boost vf2 */
     bool validateGED(Graph& g, vector<map<long, long>>& maps) {
       int find_num = 0;
+      // TODO:check for literals?
       if (maps.size() == 0) { //do not have matches
         if ((_x_type.size() != 0 && _x_type[0] == EQ_ID) ||
-            (_x_type.size() == 0 && _y_type.size() != 0 && _y_type[0] == EQ_ID)) {
-            // X:eq-id -> Y || X:NULL -> Y:eq-id
+            (_y_type.size() != 0 && _y_type[0] == EQ_ID)) {
+            // X:eq-id -> Y || X:ANY -> Y:eq-id
           return true;
         }
       } else { //have matches
@@ -502,7 +503,6 @@ class GED {
         map<long, string>::iterator it;
         for (auto& m:maps) {
           bool isX = true;
-          bool isY = true;
           types = _x_type;
           it = _x_matches.begin();
           for (auto& type:types) { // check X
@@ -568,9 +568,13 @@ class GED {
                   }
                 }
               }
+            } else if (type == EQ_ID) {
+              isX = false;
+              break;
             }
           }
           if (!isX) continue; // X is not satisfied, needn't to check Y, continue
+          bool isY = true;
           types = _y_type;
           it = _y_matches.begin();
           for (auto& type:types) { // check Y
@@ -637,7 +641,8 @@ class GED {
                 }
               }
             } else if (type == EQ_ID) {
-              continue;
+              isY = false;
+              break;
             }
           }
           if (isX && isY) { find_num++;}
