@@ -580,10 +580,11 @@ class GED {
           for (auto& type:types) { // check Y
             if (type == EQ_LET) {
               long vid = it->first;
-              string value = (it++)->second;
+              std::string value = (it++)->second;
               long gid = m.at(vid);
+              //cout << "T: " << gid << "\n"; //test
               Node& g_node = g.node(gid);
-              if (g_node.v().value() != value) { // value is not equal, break
+              if (value != g_node.v().value()) { // value is not equal, break
                 isY = false;
                 break;
               }
@@ -649,6 +650,7 @@ class GED {
           if (isX && !isY) { return false;}
         }
       }
+      //cout << "find: " << find_num << "\n"; //test
       return (find_num == 0) ? false : true;
     }
 #endif

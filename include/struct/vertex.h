@@ -16,10 +16,10 @@ class Vertex {
 
 		inline long id() {return _id;}
 		inline long label() {return _label;}
-		inline const string& value() {return _value;}
+		inline const std::string& value() {return _value;}
 
   private:
 		long _id; // vertex id
 		long _label; //vertex label
-		string _value; //vertex value
+		std::string _value; //vertex value
 };

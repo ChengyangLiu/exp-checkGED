@@ -106,7 +106,7 @@ void CheckGED::printGEDs() {
 /* rewrite GEDs (vertexes start from 0 and are continous) */
 void CheckGED::reWriteGEDs(string& path) {
 	try {
-		ofstream fout(path);
+		std::ofstream fout(path);
 		for (auto& ged:_geds) {
 			string str = "";
 			ged.toString(str, true);
@@ -115,7 +115,7 @@ void CheckGED::reWriteGEDs(string& path) {
 		}
 		fout.close();
 	} catch(std::exception& e) {
-		cout << e.what() << endl;
+		std::cout << e.what() << std::endl;
 		exit(1);
 	}
 }
@@ -133,10 +133,9 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 		vector<long>& eL = n.elabels();
 		vector<long>& eN = n.neighbors();
 		//cout << "ID:" << n.v().id() << "\n"; //test
+		if (eL.size() == 0) continue;
 		if (eL.size() == 1) {
-			vector<long> edge_pro;
-			edge_pro.emplace_back(eL[0]);
-			add_edge(n.v().id(), eN[0], edge_property(edge_pro), _boost_graph);
+			add_edge(n.v().id(), eN[0], edge_property(eL[0]), _boost_graph);
 		} else {
 			vector<pair<long, long>> edges;
 			for (int i = 0; i < eL.size(); i++) {
@@ -149,10 +148,10 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
       //cout << "B:" << edge_num << "\n"; //test
 			for (; tail <= edge_num; tail++) {
 				if (tail == edge_num || edges[head].first != edges[tail].first) {
-					vector<long> edge_pro;
+					set<long> edge_pro;
 					for (; head < tail; head++) {
 						//cout << "A:" << eL[head] << "," << eN[head] << "\n"; //test
-						edge_pro.emplace_back(eL[head]);
+						edge_pro.emplace(eL[head]);
 					}
 					add_edge(n.v().id(), eN[head-1], edge_property(edge_pro), _boost_graph);
 				}
@@ -174,9 +173,7 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 			vector<long>& eN = n.neighbors();
 			vector<pair<long, long>> edges;
 			for (int i = 0; i < eL.size(); i++) {
-				vector<long> edge_pro;
-				edge_pro.emplace_back(eL[i]);
-				add_edge(n.v().id(), eN[i], edge_property(edge_pro), pattern);
+				add_edge(n.v().id(), eN[i], edge_property(eL[i]), pattern);
 			}
 
 		}
@@ -217,7 +214,7 @@ void CheckGED::boost_vf2() {
 		  // Function vertex_order_by_mult is used to compute the order of
 		  // vertices of graph1. This is the order in which the vertices are examined
 		  // during the matching process.
-		  bool flag = boost::vf2_subgraph_iso(bp, _boost_graph, std::ref(callback), vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
+		  bool flag = boost::vf2_subgraph_iso(bp, FilteredGraph(_boost_graph, FilterSelfEdges{&_boost_graph}), std::ref(callback), vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
 			// get vector from callback
 	    auto set_of_vertex_iso_map = callback.get_setvmap();
 			// store mapping

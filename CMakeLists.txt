@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 
 project(exp-checkGED)
 SET(CMAKE_C_COMPILER g++)
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 option(E_FIRST         "Set to switch to check edges' info first"  OFF)
 option(V_FIRST    "Set to switch to check neighbors' info first" OFF)

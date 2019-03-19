@@ -31,23 +31,46 @@ bool pairComp(const pair<long, long>& a, const pair<long, long>& b) {
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <boost/graph/isomorphism.hpp>
 #include <boost/graph/graph_utility.hpp>
+#include <boost/graph/filtered_graph.hpp>
+#include <boost/container/flat_set.hpp>
+#include <boost/container/small_vector.hpp>
+
+// two containers have intersection
+template <typename  SortedRange1, typename  SortedRange2,
+    typename V = std::common_type_t<typename boost::range_value<SortedRange1>::type, typename boost::range_value<SortedRange2>::type>,
+    typename Cmp = std::less<V> >
+static inline bool has_intersection(SortedRange1 const& a, SortedRange2 const& b, Cmp cmp = {}) {
+    auto equivalent = [cmp](V const& a, V const& b)
+        { return !cmp(a,b) && !cmp(b,a); };
+
+    auto ai = a.begin();
+    auto bi = b.begin();
+
+    while (ai != a.end() && (bi = b.lower_bound(*ai)) != b.end())
+        if (equivalent(*ai++, *bi))
+            return true;
+
+    return false;
+}
 
 // Define edge and vertex properties
 // EdgeProperties
 struct  EdgeProperties {
-    EdgeProperties() {}
-    EdgeProperties(long elabel) { _elabels.emplace_back(elabel);}
-    EdgeProperties(vector<long> elabels) :_elabels(elabels) {}
-    /* overload == */
-    bool operator==(EdgeProperties const& other) const {
-      for (auto& my_l:_elabels) {
-        for (auto& o_l:other._elabels) {
-          if (my_l == o_l) return true;
-        }
+    using Labels = boost::container::flat_set<long, std::less<>>;
+
+    EdgeProperties(std::initializer_list<long> elabels = {}) :_elabels(elabels) {}
+    EdgeProperties(long elabel) { _elabels.insert(elabel);}
+    EdgeProperties(std::set<long> const& elabels) {
+      for (auto& elabel:elabels) {
+        _elabels.insert(elabel);
       }
-      return false;
     }
-    vector<long> _elabels;
+
+    bool operator==(EdgeProperties const& other) const {
+        return has_intersection(_elabels, other._elabels);
+    }
+
+    Labels _elabels;
 };
 
 //VertexProperties
@@ -57,8 +80,9 @@ struct  EdgeProperties {
     long _vlabel;
 };*/
 
-typedef boost::property<boost::vertex_name_t, long, boost::property<boost::vertex_index_t, int> > vertex_property;
+
 typedef boost::property<boost::edge_name_t, EdgeProperties> edge_property;
+typedef boost::property<boost::vertex_name_t, long> vertex_property;
 
 // Using a vecS graphs => the index maps are implicit.
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, vertex_property, edge_property> graph_type;
@@ -67,6 +91,15 @@ typedef boost::property_map<graph_type, boost::vertex_name_t>::type vertex_name_
 typedef boost::property_map_equivalent<vertex_name_map_t, vertex_name_map_t> vertex_comp_t;
 typedef boost::property_map<graph_type, boost::edge_name_t>::type edge_name_map_t;
 typedef boost::property_map_equivalent<edge_name_map_t, edge_name_map_t> edge_comp_t;
+
+// remove the self-loops in graph
+struct FilterSelfEdges {
+        graph_type const* _g;
+        bool operator()(graph_type::edge_descriptor ed) const {
+            return source(ed, *_g) != target(ed, *_g);
+        }
+    };
+using FilteredGraph = boost::filtered_graph<graph_type, FilterSelfEdges>;
 
 /* my call back, to contain the output in vf2_subgraph_iso */
 template <typename Graph1, typename Graph2>
