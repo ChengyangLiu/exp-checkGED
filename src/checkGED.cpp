@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "../include/checkGED.h"
@@ -9,451 +9,483 @@
 using namespace std;
 
 void CheckGED::loadGEDs(const string& gedpath) {
-	string line;
-	int cnt = 0;
-	bool isX = true;
-	try{
-		ifstream fin(gedpath);
-		while(getline(fin, line)) {
-			if (line.length() < 2) continue;
-			if (line[0] == '%' && line[1] == 'G') { //read gid and lid
-				string gid = line.substr(5, line.length() - 5);
-				//cout << "G:" << gid << endl;
-				getline(fin, line);
-				string lid = line.substr(5, line.length() - 5);
-				//cout << "L:" << lid << endl;
-				GED ged(gid, lid);
-				_geds.emplace_back(ged);
-				_active.emplace_back(true);
-				++cnt;
-			} else if (line[0] == 'v') { //read v
-				stringstream ss(line);
-				long id, label;
-				string value;
-				ss >> value >> id >> label >> value;
-				//cout << "ID:" << id << ",LABEL:" << label << ",VALUE:" << value << "\n";
-				_geds[cnt-1].addV(id, label, value);
-			} else if (line[0] == 'e' && line[1] != 'q') { //read e
-				stringstream ss(line);
-				long src, dst;
-				string label;
-				ss >> label >> src >> label >> dst;
-				if (label[0] == '{') {
-					label = label.substr(1, label.length()-2);
-				}
-				//cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst << "\n";
-				if (!_geds[cnt-1].addE(src, boost::lexical_cast<long>(label), dst)) {
-					cout << "GED V ID does not exist, in GED " << cnt << " in File " << gedpath << "\n";
-					exit(1);
-				}
-			} else if (line[0] == '%' && line[1] == 'X') { //X?
-				isX = true;
-			} else if (line[0] == '%' && line[1] == 'Y') { //Y?
-				isX = false;
-			} else if (line[0] == 'e' && line[1] == 'q') { //read literals
-				vector<string> details;
-				boost::split(details, line, boost::is_any_of("\t"));
-				if (details[0][3] == 'l') {
-					//format1: eq-let vid key value
-					//format2: eq-let vid value
-					//Only read in its vid and value because the format of graph is RDF which only has one key-value.
-					if (isX) {
-						if (details.size() == 4) {
-							_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[1]), details[3]);
-						} else {
-							_geds[cnt-1].addX_let(boost::lexical_cast<long>(details[1]), details[2]);
-						}
-					} else {
-						if (details.size() == 4) {
-							_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[1]), details[3]);
-						} else {
-							_geds[cnt-1].addY_let(boost::lexical_cast<long>(details[1]), details[2]);
-						}
-					}
-				} else if (details[0][3] == 'v') {
-					if (isX) {
-						_geds[cnt-1].addX_var(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]), details[4]);
-					} else {
-						_geds[cnt-1].addY_var(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]), details[4]);
-					}
-				} else if (details[0][3] == 'i') {
-					if (isX) {
-						_geds[cnt-1].addX_id(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]));
-					} else {
-						_geds[cnt-1].addY_id(boost::lexical_cast<long>(details[1]), details[2], boost::lexical_cast<long>(details[3]));
-					}
-				}
-			}
-		}
-	} catch(boost::bad_lexical_cast& e) {
-		cout << "GEDReadingError in GED NO." << (cnt-1) << ": " << e.what() << "\n";
-		exit(1);
-	} catch (std::exception& e) {
-		cout << e.what() << "\n";
-		exit(1);
-	}
+  string line;
+  int cnt = 0;
+  bool isX = true;
+  try {
+    ifstream fin(gedpath);
+    while (getline(fin, line)) {
+      if (line.length() < 2) continue;
+      if (line[0] == '%' && line[1] == 'G') {  // read gid and lid
+        string gid = line.substr(5, line.length() - 5);
+        // cout << "G:" << gid << endl;
+        getline(fin, line);
+        string lid = line.substr(5, line.length() - 5);
+        // cout << "L:" << lid << endl;
+        GED ged(gid, lid);
+        _geds.emplace_back(ged);
+        _active.emplace_back(true);
+        ++cnt;
+      } else if (line[0] == 'v') {  // read v
+        stringstream ss(line);
+        long id, label;
+        string value;
+        ss >> value >> id >> label >> value;
+        // cout << "ID:" << id << ",LABEL:" << label << ",VALUE:" << value <<
+        // "\n";
+        _geds[cnt - 1].addV(id, label, value);
+      } else if (line[0] == 'e' && line[1] != 'q') {  // read e
+        stringstream ss(line);
+        long src, dst;
+        string label;
+        ss >> label >> src >> label >> dst;
+        if (label[0] == '{') {
+          label = label.substr(1, label.length() - 2);
+        }
+        // cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst <<
+        // "\n";
+        if (!_geds[cnt - 1].addE(src, boost::lexical_cast<long>(label), dst)) {
+          cout << "GED V ID does not exist, in GED " << cnt << " in File "
+               << gedpath << "\n";
+          exit(1);
+        }
+      } else if (line[0] == '%' && line[1] == 'X') {  // X?
+        isX = true;
+      } else if (line[0] == '%' && line[1] == 'Y') {  // Y?
+        isX = false;
+      } else if (line[0] == 'e' && line[1] == 'q') {  // read literals
+        vector<string> details;
+        boost::split(details, line, boost::is_any_of("\t"));
+        if (details[0][3] == 'l') {
+          // format1: eq-let vid key value
+          // format2: eq-let vid value
+          // Only read in its vid and value because the format of graph is RDF
+          // which only has one key-value.
+          if (isX) {
+            if (details.size() == 4) {
+              _geds[cnt - 1].addX_let(boost::lexical_cast<long>(details[1]),
+                                      details[3]);
+            } else {
+              _geds[cnt - 1].addX_let(boost::lexical_cast<long>(details[1]),
+                                      details[2]);
+            }
+          } else {
+            if (details.size() == 4) {
+              _geds[cnt - 1].addY_let(boost::lexical_cast<long>(details[1]),
+                                      details[3]);
+            } else {
+              _geds[cnt - 1].addY_let(boost::lexical_cast<long>(details[1]),
+                                      details[2]);
+            }
+          }
+        } else if (details[0][3] == 'v') {
+          if (isX) {
+            _geds[cnt - 1].addX_var(
+                boost::lexical_cast<long>(details[1]), details[2],
+                boost::lexical_cast<long>(details[3]), details[4]);
+          } else {
+            _geds[cnt - 1].addY_var(
+                boost::lexical_cast<long>(details[1]), details[2],
+                boost::lexical_cast<long>(details[3]), details[4]);
+          }
+        } else if (details[0][3] == 'i') {
+          if (isX) {
+            _geds[cnt - 1].addX_id(boost::lexical_cast<long>(details[1]),
+                                   details[2],
+                                   boost::lexical_cast<long>(details[3]));
+          } else {
+            _geds[cnt - 1].addY_id(boost::lexical_cast<long>(details[1]),
+                                   details[2],
+                                   boost::lexical_cast<long>(details[3]));
+          }
+        }
+      }
+    }
+  } catch (boost::bad_lexical_cast& e) {
+    cout << "GEDReadingError in GED NO." << (cnt - 1) << ": " << e.what()
+         << "\n";
+    exit(1);
+  } catch (std::exception& e) {
+    cout << e.what() << "\n";
+    exit(1);
+  }
 }
 
 void CheckGED::printGEDs() {
-	cout << "Total:" << _geds.size() << "\n\n";
-	for (auto& ged:_geds) {
-		string str = "";
-		ged.toString(str, false);
-		cout << str << "\n";
-	}
+  cout << "Total:" << _geds.size() << "\n\n";
+  for (auto& ged : _geds) {
+    string str = "";
+    ged.toString(str, false);
+    cout << str << "\n";
+  }
 }
 
 /* rewrite GEDs (vertexes start from 0 and are continous) */
 void CheckGED::reWriteGEDs(string& path) {
-	try {
-		std::ofstream fout(path);
-		for (auto& ged:_geds) {
-			string str = "";
-			ged.toString(str, true);
-			fout << str;
-			fout << "##############\n";
-		}
-		fout.close();
-	} catch(std::exception& e) {
-		std::cout << e.what() << std::endl;
-		exit(1);
-	}
+  try {
+    std::ofstream fout(path);
+    for (auto& ged : _geds) {
+      string str = "";
+      ged.toString(str, true);
+      fout << str;
+      fout << "##############\n";
+    }
+    fout.close();
+  } catch (std::exception& e) {
+    std::cout << e.what() << std::endl;
+    exit(1);
+  }
 }
 
 #ifdef BOOST_GRAPH
 
 void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
-	// Add vertices...
-	vector<Node>& nodes = g.allNodes();
-	for (auto& n:nodes) { // start from id 0
-		add_vertex(vertex_property(n.v().label()), _boost_graph);
-	}
-	//... and edges
-	for (auto& n:nodes) {
-		vector<long>& eL = n.elabels();
-		vector<long>& eN = n.neighbors();
-		//cout << "ID:" << n.v().id() << "\n"; //test
-		if (eL.size() == 0) continue;
-		if (eL.size() == 1) {
-			add_edge(n.v().id(), eN[0], edge_property(eL[0]), _boost_graph);
-		} else {
-			vector<pair<long, long>> edges;
-			for (int i = 0; i < eL.size(); i++) {
-				edges.emplace_back(std::make_pair(eN[i], eL[i]));
-			}
-			sort(edges.begin(), edges.end(), pairComp); // sort by dst id
-			int head = 0;
-			int tail = 1;
-			int edge_num = edges.size();
-      //cout << "B:" << edge_num << "\n"; //test
-			for (; tail <= edge_num; tail++) {
-				if (tail == edge_num || edges[head].first != edges[tail].first) {
-					set<long> edge_pro;
-					for (; head < tail; head++) {
-						//cout << "A:" << eL[head] << "," << eN[head] << "\n"; //test
-						edge_pro.emplace(eL[head]);
-					}
-					add_edge(n.v().id(), eN[head-1], edge_property(edge_pro), _boost_graph);
-				}
-			}
-		}
-	}
+  // Add vertices...
+  vector<Node>& nodes = g.allNodes();
+  for (auto& n : nodes) {  // start from id 0
+    add_vertex(vertex_property(n.v().label()), _boost_graph);
+  }
+  //... and edges
+  for (auto& n : nodes) {
+    vector<long>& eL = n.elabels();
+    vector<long>& eN = n.neighbors();
+    // cout << "ID:" << n.v().id() << "\n"; //test
+    if (eL.size() == 0) continue;
+    if (eL.size() == 1) {
+      add_edge(n.v().id(), eN[0], edge_property(eL[0]), _boost_graph);
+    } else {
+      vector<pair<long, long>> edges;
+      for (int i = 0; i < eL.size(); i++) {
+        edges.emplace_back(std::make_pair(eN[i], eL[i]));
+      }
+      sort(edges.begin(), edges.end(), pairComp);  // sort by dst id
+      int head = 0;
+      int tail = 1;
+      int edge_num = edges.size();
+      // cout << "B:" << edge_num << "\n"; //test
+      for (; tail <= edge_num; tail++) {
+        if (tail == edge_num || edges[head].first != edges[tail].first) {
+          set<long> edge_pro;
+          for (; head < tail; head++) {
+            // cout << "A:" << eL[head] << "," << eN[head] << "\n"; //test
+            edge_pro.emplace(eL[head]);
+          }
+          add_edge(n.v().id(), eN[head - 1], edge_property(edge_pro),
+                   _boost_graph);
+        }
+      }
+    }
+  }
 
-	for (auto& ged:geds) {
-		// Create graph1
-		graph_type pattern;
-		// Add vertices...
-		vector<Node>& nodes = ged.pattern();
-		for (auto& n:nodes) { // start from id 0
-			add_vertex(vertex_property(n.v().label()), pattern);
-		}
-		//... and edges
-		for (auto& n:nodes) {
-			vector<long>& eL = n.elabels();
-			vector<long>& eN = n.neighbors();
-			vector<pair<long, long>> edges;
-			for (int i = 0; i < eL.size(); i++) {
-				add_edge(n.v().id(), eN[i], edge_property(eL[i]), pattern);
-			}
-
-		}
-		_boost_patterns.emplace_back(pattern);
-	}
+  for (auto& ged : geds) {
+    // Create graph1
+    graph_type pattern;
+    // Add vertices...
+    vector<Node>& nodes = ged.pattern();
+    for (auto& n : nodes) {  // start from id 0
+      add_vertex(vertex_property(n.v().label()), pattern);
+    }
+    //... and edges
+    for (auto& n : nodes) {
+      vector<long>& eL = n.elabels();
+      vector<long>& eN = n.neighbors();
+      vector<pair<long, long>> edges;
+      for (int i = 0; i < eL.size(); i++) {
+        add_edge(n.v().id(), eN[i], edge_property(eL[i]), pattern);
+      }
+    }
+    _boost_patterns.emplace_back(pattern);
+  }
 }
 
 void CheckGED::boost_filter() {
-	for (int i = 0; i < _geds.size(); i++) {
-		int num = 0;
-		vector<Node>& nodes = _geds[i].pattern();
+  for (int i = 0; i < _geds.size(); i++) {
+    int num = 0;
+    vector<Node>& nodes = _geds[i].pattern();
     int node_num = nodes.size();
-		for (auto& node:nodes) {
-			vector<long>& neighbors = node.neighbors();
-			num += neighbors.size();
-		}
+    for (auto& node : nodes) {
+      vector<long>& neighbors = node.neighbors();
+      num += neighbors.size();
+    }
     // TODO:filter independent node situation
-		if (num == 0 || num + 1 < node_num) {
-			_active[i] = false;
-		}
-	}
+    if (num == 0 || num + 1 < node_num) {
+      _active[i] = false;
+    }
+  }
 }
 
 void CheckGED::boost_vf2() {
-	vector<graph_type>& bps = _boost_patterns;
-	int pos = 0;
-	for (auto& bp:bps) {
-		vector<map<long, long>> id_maps;
-		cout << "vf2 on No." << pos + 1 << " GEDs\n";
-		if (_active[pos] != false) {//ignore filtered patterns
-			// Create the vertex binary predicate
-			vertex_comp_t vertex_comp = make_property_map_equivalent(get(boost::vertex_name, bp), get(boost::vertex_name, _boost_graph));
-		  // Create the vertex binary predicate
-		  edge_comp_t edge_comp = make_property_map_equivalent(get(boost::edge_name, bp), get(boost::edge_name, _boost_graph));
-			// Create callback
-		  my_call_back<graph_type, graph_type> callback(bp, _boost_graph);
-		  // Print out all subgraph isomorphism mappings between graph1 and graph2.
-		  // Function vertex_order_by_mult is used to compute the order of
-		  // vertices of graph1. This is the order in which the vertices are examined
-		  // during the matching process.
-		  bool flag = boost::vf2_subgraph_iso(bp, FilteredGraph(_boost_graph, FilterSelfEdges{&_boost_graph}), std::ref(callback), vertex_order_by_mult(bp), edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
-			// get vector from callback
-	    auto set_of_vertex_iso_map = callback.get_setvmap();
-			// store mapping
-			for (auto& set_of_v:set_of_vertex_iso_map) {
-				map<long, long> id_map;
-	      for (auto& v:set_of_v) {
-					id_map[v.first] = v.second;
-				}
-	      id_maps.emplace_back(id_map);
-	    }
-		}
-		_maps.emplace_back(id_maps);
-		pos++;
-	}
+  vector<graph_type>& bps = _boost_patterns;
+  int pos = 0;
+  for (auto& bp : bps) {
+    vector<map<long, long>> id_maps;
+    cout << "vf2 on No." << pos + 1 << " GEDs\n";
+    if (_active[pos] != false) {  // ignore filtered patterns
+      // Create the vertex binary predicate
+      vertex_comp_t vertex_comp = make_property_map_equivalent(
+          get(boost::vertex_name, bp), get(boost::vertex_name, _boost_graph));
+      // Create the vertex binary predicate
+      edge_comp_t edge_comp = make_property_map_equivalent(
+          get(boost::edge_name, bp), get(boost::edge_name, _boost_graph));
+      // Create callback
+      my_call_back<graph_type, graph_type> callback(bp, _boost_graph);
+      // Print out all subgraph isomorphism mappings between graph1 and graph2.
+      // Function vertex_order_by_mult is used to compute the order of
+      // vertices of graph1. This is the order in which the vertices are
+      // examined during the matching process.
+      bool flag = boost::vf2_subgraph_iso(
+          bp, FilteredGraph(_boost_graph, FilterSelfEdges{&_boost_graph}),
+          std::ref(callback), vertex_order_by_mult(bp),
+          edges_equivalent(edge_comp).vertices_equivalent(vertex_comp));
+      // get vector from callback
+      auto set_of_vertex_iso_map = callback.get_setvmap();
+      // store mapping
+      for (auto& set_of_v : set_of_vertex_iso_map) {
+        map<long, long> id_map;
+        for (auto& v : set_of_v) {
+          id_map[v.first] = v.second;
+        }
+        id_maps.emplace_back(id_map);
+      }
+    }
+    _maps.emplace_back(id_maps);
+    pos++;
+  }
 }
 
 void CheckGED::boost_writeMapping(string& mapfile) {
-	try {
-		ofstream fout(mapfile);
-		int id = 0;
-    for (auto& set_of_v:_maps) {
-			fout << "#" << ++id << ":\n";
-      for (auto& vs:set_of_v) {
-				for (auto& v:vs) {
-					fout << "(" << v.first << "," << v.second << ")" << "\t";
-				}
-				fout << "\n";
-			}
-			fout << "$" << "\n";
+  try {
+    ofstream fout(mapfile);
+    int id = 0;
+    for (auto& set_of_v : _maps) {
+      fout << "#" << ++id << ":\n";
+      for (auto& vs : set_of_v) {
+        for (auto& v : vs) {
+          fout << "(" << v.first << "," << v.second << ")"
+               << "\t";
+        }
+        fout << "\n";
+      }
+      fout << "$"
+           << "\n";
     }
-		fout.close();
-	} catch(std::exception& e) {
-		cout << e.what() << endl;
-		exit(1);
-	}
+    fout.close();
+  } catch (std::exception& e) {
+    cout << e.what() << endl;
+    exit(1);
+  }
 }
 
 void CheckGED::boost_validation() {
-	for (int i = 0; i < _geds.size(); i++) {
-		cout << "Checking NO." << (i+1) << " GED";
-		if (!_geds[i].checkLiteralFormat()) {
-			_active[i] = false;
-			cout << "\t-1\n"; //Literals are wrong format.
-		} else {
-			if (!_geds[i].validateGED(_graph, _maps[i])) {
-				_active[i] = false;
-				cout << "\t0\n"; //The GED is wrong.(maybe pattern or literals do not exist or "X->Y" is not one and only in graph)
-			} else {
-				cout << "\t1\n"; //The GED is right.(pattern is right and "X->Y" is unique)
-			}
-		}
-	}
-	cout << "\nThe results:\n";
-	for (int i = 0; i < _active.size(); i++) {
-		if (_active[i]) {
-			cout << "1\t";
-		} else {
-			cout << "0\t";
-		}
-		if ((i+1) % 5 == 0) cout << "\n";
-	}
-	cout << "\n";
+  for (int i = 0; i < _geds.size(); i++) {
+    cout << "Checking NO." << (i + 1) << " GED";
+    if (!_geds[i].checkLiteralFormat()) {
+      _active[i] = false;
+      cout << "\t-1\n";  // Literals are wrong format.
+    } else {
+      if (!_geds[i].validateGED(_graph, _maps[i])) {
+        _active[i] = false;
+        cout << "\t0\n";  // The GED is wrong.(maybe pattern or literals do not
+                          // exist or "X->Y" is not one and only in graph)
+      } else {
+        cout << "\t1\n";  // The GED is right.(pattern is right and "X->Y" is
+                          // unique)
+      }
+    }
+  }
+  cout << "\nThe results:\n";
+  for (int i = 0; i < _active.size(); i++) {
+    if (_active[i]) {
+      cout << "1\t";
+    } else {
+      cout << "0\t";
+    }
+    if ((i + 1) % 5 == 0) cout << "\n";
+  }
+  cout << "\n";
 }
 #endif
 
 void CheckGED::validation() {
-	clock_t start, end, tmp;
-	tmp = start = clock();
-	for (int i = 0; i < _geds.size(); i++) {
-		cout << "Checking NO." << (i+1) << " GED";
-		if (!_geds[i].checkLiteralFormat()) {
-			_active[i] = false;
-			cout << "\t-1\n"; //Literals are wrong format.
-		} else {
-			if (!_geds[i].validateGED(_graph)) {
-				_active[i] = false;
-				cout << "\t0\n"; //The GED is wrong.(maybe pattern or literals do not exist or "X->Y" is not one and only in graph)
-			} else {
-				cout << "\t1\n"; //The GED is right.(pattern is right and "X->Y" is unique)
-			}
-		}
-		if ((i+1)%200 == 0) {
-			end = clock();
-			cout << "Cost: " << (double)(end - tmp)/CLOCKS_PER_SEC << " s\n";
-			tmp = end;
-		}
-	}
-	end = clock();
-	cout << "Total cost: " << (double)(end - start)/CLOCKS_PER_SEC << " s\n";
-	cout << "\nThe results:\n";
-	for (int i = 0; i < _active.size(); i++) {
-		if (_active[i]) {
-			cout << "1\t";
-		} else {
-			cout << "0\t";
-		}
-		if ((i+1) % 5 == 0) cout << "\n";
-	}
-	cout << "\n";
+  clock_t start, end, tmp;
+  tmp = start = clock();
+  for (int i = 0; i < _geds.size(); i++) {
+    cout << "Checking NO." << (i + 1) << " GED";
+    if (!_geds[i].checkLiteralFormat()) {
+      _active[i] = false;
+      cout << "\t-1\n";  // Literals are wrong format.
+    } else {
+      if (!_geds[i].validateGED(_graph)) {
+        _active[i] = false;
+        cout << "\t0\n";  // The GED is wrong.(maybe pattern or literals do not
+                          // exist or "X->Y" is not one and only in graph)
+      } else {
+        cout << "\t1\n";  // The GED is right.(pattern is right and "X->Y" is
+                          // unique)
+      }
+    }
+    if ((i + 1) % 200 == 0) {
+      end = clock();
+      cout << "Cost: " << (double)(end - tmp) / CLOCKS_PER_SEC << " s\n";
+      tmp = end;
+    }
+  }
+  end = clock();
+  cout << "Total cost: " << (double)(end - start) / CLOCKS_PER_SEC << " s\n";
+  cout << "\nThe results:\n";
+  for (int i = 0; i < _active.size(); i++) {
+    if (_active[i]) {
+      cout << "1\t";
+    } else {
+      cout << "0\t";
+    }
+    if ((i + 1) % 5 == 0) cout << "\n";
+  }
+  cout << "\n";
 }
 
 void CheckGED::writeValidatedGEDs(const string& gedpath) {
-	ofstream fout(gedpath);
-	int cnt = _active.size();
-	for (int i = 0; i < cnt; i++) {
-		if (_active[i]) {
-			string res = "";
-			_geds[i].toString(res, false);
-			fout << res;
+  ofstream fout(gedpath);
+  int cnt = _active.size();
+  for (int i = 0; i < cnt; i++) {
+    if (_active[i]) {
+      string res = "";
+      _geds[i].toString(res, false);
+      fout << res;
       fout << "##############\n";
-		}
-	}
-	fout.close();
+    }
+  }
+  fout.close();
 }
 
 void CheckGED::delivery(string& gedpath, int frag_num) {
-	string line;
+  string line;
   int ged_cnt = 0;
-	try{
-		ifstream fin(gedpath);
+  try {
+    ifstream fin(gedpath);
     vector<string> strList;
-    while(getline(fin, line)) {
-      if (line[0] == '%' && line[1] == 'G') { ged_cnt++;}
+    while (getline(fin, line)) {
+      if (line[0] == '%' && line[1] == 'G') {
+        ged_cnt++;
+      }
       strList.emplace_back(line);
     }
-		//cout << frag_num << "\n";
-		//cout << ged_cnt << "\n";
-    const int volume = ((int) ged_cnt/frag_num) + 1;
-		//cout << volume << "\n";
+    // cout << frag_num << "\n";
+    // cout << ged_cnt << "\n";
+    const int volume = ((int)ged_cnt / frag_num) + 1;
+    // cout << volume << "\n";
 
     int frag_id = 0;
     int i = 0;
-		int total = strList.size();
-		string last = "";
+    int total = strList.size();
+    string last = "";
     for (; frag_id < frag_num; frag_id++) {
-			int now_cnt = 0;
-			string resfile = gedpath + boost::lexical_cast<string>(frag_id);
-			ofstream fout(resfile);
-			if (last != "") fout << last << "\n";
-			for (; i < total; i++) {
-				if (strList[i][0] == '%' && strList[i][1] == 'G') {
-					now_cnt++;
-					if (now_cnt > volume) {
-						break;
-					}
-				}
-				fout << strList[i] << "\n";
-			}
-			fout.close();
-		}
+      int now_cnt = 0;
+      string resfile = gedpath + boost::lexical_cast<string>(frag_id);
+      ofstream fout(resfile);
+      if (last != "") fout << last << "\n";
+      for (; i < total; i++) {
+        if (strList[i][0] == '%' && strList[i][1] == 'G') {
+          now_cnt++;
+          if (now_cnt > volume) {
+            break;
+          }
+        }
+        fout << strList[i] << "\n";
+      }
+      fout.close();
+    }
   } catch (std::exception& e) {
-		cout << e.what();
-		exit(1);
-	}
+    cout << e.what();
+    exit(1);
+  }
 }
 
-int main(int argc, char **argv) {
-	int mode = 0;
-	int frag_num = 1;
-	string filename = "";
-	string gedpath = "";
-	if (argc < 2) {
-		cout << "Missing Parameters!" << endl;
-		exit(1);
-	}
-	mode = atoi(argv[1]);
-	if (mode == 1) { //validate GEDs  ./checkGED 1 $Graph_file $GED_path
-		if (argc < 4) {
-			cout << "Missing Parameters!" << endl;
-			exit(1);
-		}
-		filename = argv[2];
-		gedpath = argv[3];
+int main(int argc, char** argv) {
+  int mode = 0;
+  int frag_num = 1;
+  string filename = "";
+  string gedpath = "";
+  if (argc < 2) {
+    cout << "Missing Parameters!" << endl;
+    exit(1);
+  }
+  mode = atoi(argv[1]);
+  if (mode == 1) {  // validate GEDs  ./checkGED 1 $Graph_file $GED_path
+    if (argc < 4) {
+      cout << "Missing Parameters!" << endl;
+      exit(1);
+    }
+    filename = argv[2];
+    gedpath = argv[3];
 
-		CheckGED cg;
-		Graph& g = cg.graph();
-		vector<GED>& geds = cg.geds();
+    CheckGED cg;
+    Graph& g = cg.graph();
+    vector<GED>& geds = cg.geds();
 
-		cg.loadGraph(filename);
-		cg.printGraph();
+    cg.loadGraph(filename);
+    cg.printGraph();
 
-		cg.loadGEDs(gedpath);
-		cg.printGEDs();
+    cg.loadGEDs(gedpath);
+    cg.printGEDs();
 
-	#ifdef BOOST_GRAPH //Graph's and GEDs' vertices must start from id 0 and continous.
+#ifdef BOOST_GRAPH  // Graph's and GEDs' vertices must start from id 0 and
+                    // continous.
 
-		string mapfile = gedpath + ".map";
-		string resfile = gedpath + ".vali";
-		//convert graph and geds to boost graph format
-		cg.convert2BG(g, geds);
-		//filter unexpected GEDs
-		cg.boost_filter();
-		//use boost vf2 to produce mapping from GEDs to Graph
-		cg.boost_vf2();
-		//write mapping from GEDs to Graph
-		cg.boost_writeMapping(mapfile);
-		//validate literals
-		cg.boost_validation();
-		//write results
-	  cg.writeValidatedGEDs(resfile);
-	#else
-	  //validate
-	  cg.validation();
-	  //write file
-		string resfile = gedpath + ".vali";
-	  cg.writeValidatedGEDs(resfile);
-	#endif
-	} else if (mode == 2) { //cut GEDs ./checkGED 2 $GED_path NUM
-		if (argc < 4) {
-			cout << "Missing Parameters!" << endl;
-			exit(1);
-		}
-		gedpath = argv[2];
+    string mapfile = gedpath + ".map";
+    string resfile = gedpath + ".vali";
+    // convert graph and geds to boost graph format
+    cg.convert2BG(g, geds);
+    // filter unexpected GEDs
+    cg.boost_filter();
+    // use boost vf2 to produce mapping from GEDs to Graph
+    cg.boost_vf2();
+    // write mapping from GEDs to Graph
+    cg.boost_writeMapping(mapfile);
+    // validate literals
+    cg.boost_validation();
+    // write results
+    cg.writeValidatedGEDs(resfile);
+#else
+    // validate
+    cg.validation();
+    // write file
+    string resfile = gedpath + ".vali";
+    cg.writeValidatedGEDs(resfile);
+#endif
+  } else if (mode == 2) {  // cut GEDs ./checkGED 2 $GED_path NUM
+    if (argc < 4) {
+      cout << "Missing Parameters!" << endl;
+      exit(1);
+    }
+    gedpath = argv[2];
 
-		int frag_num = atoi(argv[3]);
-		CheckGED cg;
-		cg.delivery(gedpath, frag_num);
-	} else if (mode == 3) { //rewrite Graph and GEDs ./checkGED 3 $Graph_file $GEDs_path
-		if (argc < 4) {
-			cout << "Missing Parameters!" << endl;
-			exit(1);
-		}
-		filename = argv[2];
-		gedpath = argv[3];
+    int frag_num = atoi(argv[3]);
+    CheckGED cg;
+    cg.delivery(gedpath, frag_num);
+  } else if (mode ==
+             3) {  // rewrite Graph and GEDs ./checkGED 3 $Graph_file $GEDs_path
+    if (argc < 4) {
+      cout << "Missing Parameters!" << endl;
+      exit(1);
+    }
+    filename = argv[2];
+    gedpath = argv[3];
 
-		CheckGED cg;
-		Graph& g = cg.graph();
-		cg.loadGraph(filename);
-		//cg.printGraph();
-		// rewrite graph, make vertices start from id 0 and continous.
-		string repath = filename + ".remap";
-		g.rewriteGraph(repath);
+    CheckGED cg;
+    Graph& g = cg.graph();
+    cg.loadGraph(filename);
+    // cg.printGraph();
+    // rewrite graph, make vertices start from id 0 and continous.
+    string repath = filename + ".remap";
+    g.rewriteGraph(repath);
 
-		cg.loadGEDs(gedpath);
-		//cg.printGEDs();
-		// rewrite GEDs, make vertices start from id 0 and continous.
-		repath = gedpath + ".remap";
-		cg.reWriteGEDs(repath);
-	}
+    cg.loadGEDs(gedpath);
+    // cg.printGEDs();
+    // rewrite GEDs, make vertices start from id 0 and continous.
+    repath = gedpath + ".remap";
+    cg.reWriteGEDs(repath);
+  }
 
-	return 0;
+  return 0;
 }
