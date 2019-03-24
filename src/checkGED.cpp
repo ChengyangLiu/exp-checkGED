@@ -42,13 +42,14 @@ void CheckGED::loadGEDs(const string& gedpath) {
         if (label[0] == '{') {
           label = label.substr(1, label.length() - 2);
         }
-        // cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst <<
-        // "\n";
+         //cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst <<
+         //"\n"; //test
         if (!_geds[cnt - 1].addE(src, boost::lexical_cast<long>(label), dst)) {
           cout << "GED V ID does not exist, in GED " << cnt << " in File "
                << gedpath << "\n";
           exit(1);
         }
+        //cout << "OK\n"; //test
       } else if (line[0] == '%' && line[1] == 'X') {  // X?
         isX = true;
       } else if (line[0] == '%' && line[1] == 'Y') {  // Y?
@@ -89,21 +90,36 @@ void CheckGED::loadGEDs(const string& gedpath) {
                 boost::lexical_cast<long>(details[3]), details[4]);
           }
         } else if (details[0][3] == 'i') {
+          //cout << "TEST: " << details[1] << "," << details[2] << "," << details[3] << "\n"; //test
           if (isX) {
-            _geds[cnt - 1].addX_id(boost::lexical_cast<long>(details[1]),
-                                   details[2],
-                                   boost::lexical_cast<long>(details[3]));
+            if (details.size() == 3) {
+              string str_id = "id";
+              _geds[cnt - 1].addX_id(boost::lexical_cast<long>(details[1]),
+                                     str_id,
+                                     boost::lexical_cast<long>(details[2]));
+            } else {
+              _geds[cnt - 1].addX_id(boost::lexical_cast<long>(details[1]),
+                                     details[2],
+                                     boost::lexical_cast<long>(details[3]));
+            }
           } else {
-            _geds[cnt - 1].addY_id(boost::lexical_cast<long>(details[1]),
-                                   details[2],
-                                   boost::lexical_cast<long>(details[3]));
+            if (details.size() == 3) {
+              string str_id = "id";
+              _geds[cnt - 1].addY_id(boost::lexical_cast<long>(details[1]),
+                                     str_id,
+                                     boost::lexical_cast<long>(details[2]));
+            } else {
+              _geds[cnt - 1].addY_id(boost::lexical_cast<long>(details[1]),
+                                     details[2],
+                                     boost::lexical_cast<long>(details[3]));
+            }
           }
+          //cout << "EOK\n"; //test
         }
       }
     }
   } catch (boost::bad_lexical_cast& e) {
-    cout << "GEDReadingError in GED NO." << (cnt - 1) << ": " << e.what()
-         << "\n";
+    cout << "GEDReadingError in GED NO." << cnt << ": " << e.what() << "\n";
     exit(1);
   } catch (std::exception& e) {
     cout << e.what() << "\n";
