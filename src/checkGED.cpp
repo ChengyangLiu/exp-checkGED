@@ -208,7 +208,7 @@ void CheckGED::boost_filter() {
       num += neighbors.size();
     }
     // TODO:filter independent node situation
-    if (num == 0 || num + 1 < node_num) {
+    if (num == 0 /*|| num + 1 < node_num*/) {
       _active[i] = false;
     }
   }
