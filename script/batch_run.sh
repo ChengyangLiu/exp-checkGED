@@ -14,7 +14,8 @@ for ((i=0; i<30; i++))
 do
 
 GRAPH_FILE=$1          # graph file path
-GED_FILE=$2$i".gfd"    # ged file path
+#GED_FILE=$2$i".gfd"    # gfd file path
+GED_FILE=$2$i".ged"    # ged file path
 
 
 GRAPH_REMAP_FIEL=$GRAPH_FILE".remap"   # graph map

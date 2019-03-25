@@ -87,7 +87,7 @@ class Graph {
   }
 
   /* rewrite graph (vertexes start from 0 and are continous) */
-  void rewriteGraph(string& path) {
+  void rewriteGraph(const string& path) {
     try {
       ofstream fvout(path + ".v");
       for (auto& node : _nodes) {

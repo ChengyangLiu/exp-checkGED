@@ -42,14 +42,14 @@ void CheckGED::loadGEDs(const string& gedpath) {
         if (label[0] == '{') {
           label = label.substr(1, label.length() - 2);
         }
-         //cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst <<
-         //"\n"; //test
+        // cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst <<
+        //"\n"; //test
         if (!_geds[cnt - 1].addE(src, boost::lexical_cast<long>(label), dst)) {
           cout << "GED V ID does not exist, in GED " << cnt << " in File "
                << gedpath << "\n";
           exit(1);
         }
-        //cout << "OK\n"; //test
+        // cout << "OK\n"; //test
       } else if (line[0] == '%' && line[1] == 'X') {  // X?
         isX = true;
       } else if (line[0] == '%' && line[1] == 'Y') {  // Y?
@@ -90,7 +90,8 @@ void CheckGED::loadGEDs(const string& gedpath) {
                 boost::lexical_cast<long>(details[3]), details[4]);
           }
         } else if (details[0][3] == 'i') {
-          //cout << "TEST: " << details[1] << "," << details[2] << "," << details[3] << "\n"; //test
+          // cout << "TEST: " << details[1] << "," << details[2] << "," <<
+          // details[3] << "\n"; //test
           if (isX) {
             if (details.size() == 3) {
               string str_id = "id";
@@ -114,7 +115,7 @@ void CheckGED::loadGEDs(const string& gedpath) {
                                      boost::lexical_cast<long>(details[3]));
             }
           }
-          //cout << "EOK\n"; //test
+          // cout << "EOK\n"; //test
         }
       }
     }
@@ -137,14 +138,13 @@ void CheckGED::printGEDs() {
 }
 
 /* rewrite GEDs (vertexes start from 0 and are continous) */
-void CheckGED::reWriteGEDs(string& path) {
+void CheckGED::reWriteGEDs(const string& path) {
   try {
     std::ofstream fout(path);
     for (auto& ged : _geds) {
       string str = "";
       ged.toString(str, true);
-      fout << str;
-      fout << "##############\n";
+      fout << str << "##############\n";
     }
     fout.close();
   } catch (std::exception& e) {
@@ -235,7 +235,7 @@ void CheckGED::boost_vf2() {
   int pos = 0;
   for (auto& bp : bps) {
     vector<map<long, long>> id_maps;
-    cout << "vf2 on No." << pos + 1 << " GEDs\n";
+    cout << "vf2 on No." << pos + 1 << " GED\n";
     if (_active[pos] != false) {  // ignore filtered patterns
       // Create the vertex binary predicate
       vertex_comp_t vertex_comp = make_property_map_equivalent(
@@ -269,7 +269,7 @@ void CheckGED::boost_vf2() {
   }
 }
 
-void CheckGED::boost_writeMapping(string& mapfile) {
+void CheckGED::boost_writeMapping(const string& mapfile) {
   try {
     ofstream fout(mapfile);
     int id = 0;
@@ -277,13 +277,11 @@ void CheckGED::boost_writeMapping(string& mapfile) {
       fout << "#" << ++id << ":\n";
       for (auto& vs : set_of_v) {
         for (auto& v : vs) {
-          fout << "(" << v.first << "," << v.second << ")"
-               << "\t";
+          fout << "(" << v.first << "," << v.second << ")" << "\t";
         }
         fout << "\n";
       }
-      fout << "$"
-           << "\n";
+      fout << "$" << "\n";
     }
     fout.close();
   } catch (std::exception& e) {
@@ -367,14 +365,13 @@ void CheckGED::writeValidatedGEDs(const string& gedpath) {
     if (_active[i]) {
       string res = "";
       _geds[i].toString(res, false);
-      fout << res;
-      fout << "##############\n";
+      fout << res << "##############\n";
     }
   }
   fout.close();
 }
 
-void CheckGED::delivery(string& gedpath, int frag_num) {
+void CheckGED::delivery(const string& gedpath, int frag_num) {
   string line;
   int ged_cnt = 0;
   try {
@@ -427,7 +424,8 @@ int main(int argc, char** argv) {
     exit(1);
   }
   mode = atoi(argv[1]);
-  if (mode == 1) {  // validate GEDs  ./checkGED 1 $Graph_file $GED_path
+  if (mode == 1) {
+    // validate GEDs  ./checkGED 1 $Graph_file $GED_path
     if (argc < 4) {
       cout << "Missing Parameters!" << endl;
       exit(1);
@@ -447,7 +445,6 @@ int main(int argc, char** argv) {
 
 #ifdef BOOST_GRAPH  // Graph's and GEDs' vertices must start from id 0 and
                     // continous.
-
     string mapfile = gedpath + ".map";
     string resfile = gedpath + ".vali";
     // convert graph and geds to boost graph format
@@ -469,7 +466,9 @@ int main(int argc, char** argv) {
     string resfile = gedpath + ".vali";
     cg.writeValidatedGEDs(resfile);
 #endif
-  } else if (mode == 2) {  // cut GEDs ./checkGED 2 $GED_path NUM
+
+  } else if (mode == 2) {
+    // cut GEDs ./checkGED 2 $GED_path NUM
     if (argc < 4) {
       cout << "Missing Parameters!" << endl;
       exit(1);
@@ -479,8 +478,8 @@ int main(int argc, char** argv) {
     int frag_num = atoi(argv[3]);
     CheckGED cg;
     cg.delivery(gedpath, frag_num);
-  } else if (mode ==
-             3) {  // rewrite Graph and GEDs ./checkGED 3 $Graph_file $GEDs_path
+  } else if (mode == 3) {
+    // rewrite Graph and GEDs ./checkGED 3 $Graph_file $GEDs_path
     if (argc < 4) {
       cout << "Missing Parameters!" << endl;
       exit(1);

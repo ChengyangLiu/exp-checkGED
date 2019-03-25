@@ -11,13 +11,10 @@ enum GED_TYPE {
 /* check whether 2 vector do not have intersection */
 template <typename T>
 bool const interEmpty(vector<T> const& a, vector<T> const& b) {
-  for (int i = 0; i < a.size(); i++) {
-    for (int j = 0; j < b.size(); j++) {
-      if (a[i] == b[i]) {
-        return false;
-      }
-    }
-  }
+  for (int i = 0; i < a.size(); i++)
+    for (int j = 0; j < b.size(); j++)
+      if (a[i] == b[i]) return false;
+
   return true;
 }
 
@@ -65,9 +62,8 @@ struct EdgeProperties {
       : _elabels(elabels) {}
   EdgeProperties(long elabel) { _elabels.insert(elabel); }
   EdgeProperties(std::set<long> const& elabels) {
-    for (auto& elabel : elabels) {
+    for (auto& elabel : elabels)
       _elabels.insert(elabel);
-    }
   }
 
   bool operator==(EdgeProperties const& other) const {
@@ -77,29 +73,22 @@ struct EdgeProperties {
   Labels _elabels;
 };
 
-// VertexProperties
-/*struct VertexProperties {
-    VertexProperties() {}
-    VertexProperties(long vlabel) :_vlabel(vlabel) {}
-    long _vlabel;
-};*/
-
 typedef boost::property<boost::edge_name_t, EdgeProperties> edge_property;
 typedef boost::property<boost::vertex_name_t, long> vertex_property;
 
 // Using a vecS graphs => the index maps are implicit.
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                              vertex_property, edge_property>
-    graph_type;
+        vertex_property, edge_property>
+        graph_type;
 
 typedef boost::property_map<graph_type, boost::vertex_name_t>::type
-    vertex_name_map_t;
+        vertex_name_map_t;
 typedef boost::property_map_equivalent<vertex_name_map_t, vertex_name_map_t>
-    vertex_comp_t;
+        vertex_comp_t;
 typedef boost::property_map<graph_type, boost::edge_name_t>::type
-    edge_name_map_t;
+        edge_name_map_t;
 typedef boost::property_map_equivalent<edge_name_map_t, edge_name_map_t>
-    edge_comp_t;
+        edge_comp_t;
 
 // remove the self-loops in graph
 struct FilterSelfEdges {

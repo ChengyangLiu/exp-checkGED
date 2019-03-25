@@ -25,14 +25,14 @@ class CheckGED {
   void printGEDs();
 
   /* rewrite GEDs, make vertices start from 0 and continous */
-  void reWriteGEDs(string& path);
+  void reWriteGEDs(const string& path);
   /* validate GEDs */
   void validation();
   /* write correct GEDs into file */
   void writeValidatedGEDs(const string& gedpath);
 
   /* separate the GEDs into many parts */
-  void delivery(string& gedpath, int frag_num);
+  void delivery(const string& gedpath, int frag_num);
 
 #ifdef BOOST_GRAPH
   /* CAUTION: the graph's and GEDs' id must start from 0 and be continous!
@@ -58,7 +58,7 @@ class CheckGED {
   inline vector<graph_type>& boost_patterns() { return _boost_patterns; }
 
   /* output mapping */
-  void boost_writeMapping(string& mapfile);
+  void boost_writeMapping(const string& mapfile);
 
  private:
   graph_type _boost_graph;                // boost graph
