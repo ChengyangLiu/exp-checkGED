@@ -741,6 +741,16 @@ class GED {
     literalString(str, remap);
   }
 
+  /* return true, if given node has parents */
+  bool hasParent(long id) {
+    for (auto& node : _nodes) {
+      vector<long>& neighbors = node.neighbors();
+      for (auto& nebor_id : neighbors)
+        if (nebor_id == id) return true;
+    }
+    return false;
+  }
+
  private:
   /* get node by given vid, only for existed id */
   inline Node& node(long vid) { return _nodes[_id_map[vid]]; }

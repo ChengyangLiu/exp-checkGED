@@ -216,17 +216,13 @@ void CheckGED::convert2BG(Graph& g, vector<GED>& geds) {
 
 void CheckGED::boost_filter() {
   for (int i = 0; i < _geds.size(); i++) {
-    int num = 0;
     vector<Node>& nodes = _geds[i].pattern();
-    int node_num = nodes.size();
-    for (auto& node : nodes) {
-      vector<long>& neighbors = node.neighbors();
-      num += neighbors.size();
-    }
-    // TODO:filter independent node situation
-    if (num == 0 /*|| num + 1 < node_num*/) {
-      _active[i] = false;
-    }
+    // Filter independent node situation
+    for (auto& node : nodes)
+      if (node.neighbors().size() == 0 && !_geds[i].hasParent(node.v().id())) {
+        _active[i] = false;
+        break;
+      }
   }
 }
 
@@ -277,11 +273,13 @@ void CheckGED::boost_writeMapping(const string& mapfile) {
       fout << "#" << ++id << ":\n";
       for (auto& vs : set_of_v) {
         for (auto& v : vs) {
-          fout << "(" << v.first << "," << v.second << ")" << "\t";
+          fout << "(" << v.first << "," << v.second << ")"
+               << "\t";
         }
         fout << "\n";
       }
-      fout << "$" << "\n";
+      fout << "$"
+           << "\n";
     }
     fout.close();
   } catch (std::exception& e) {
