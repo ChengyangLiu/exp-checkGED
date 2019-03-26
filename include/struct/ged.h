@@ -616,8 +616,7 @@ class GED {
               }
             }
           } else if (type == EQ_ID) {
-            isX = false;
-            break;
+            return false;
           }
         }
         if (!isX) continue;  // X is not satisfied, needn't to check Y, continue
@@ -701,6 +700,8 @@ class GED {
         }
       }
     }
+    // if given ged does not exist in graph, in case "eq-id", return true
+    if (_y_type.size() != 0 && _y_type[0] == EQ_ID) return true;
     // cout << "find: " << find_num << "\n"; //test
     return (find_num == 0) ? false : true;
   }
@@ -751,9 +752,19 @@ class GED {
     return false;
   }
 
- private:
+  /* if given node has parents, get its parents */
+  void getParent(long id, set<long>& pars) {
+    for (auto& node : _nodes) {
+      vector<long>& neighbors = node.neighbors();
+      for (auto& nebor_id : neighbors)
+        if (nebor_id == id) pars.emplace(node.v().id());
+    }
+  }
+
   /* get node by given vid, only for existed id */
   inline Node& node(long vid) { return _nodes[_id_map[vid]]; }
+
+ private:
   /* check exist */
   inline bool nodeExist(long vid) {
     return _id_map.find(vid) != _id_map.end() ? true : false;
