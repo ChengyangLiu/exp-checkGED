@@ -58,19 +58,18 @@ class CheckGED {
   void boost_validation();
 
   inline graph_type& boost_graph() { return _boost_graph; }
-  inline vector<vector<graph_type>>& boost_patterns() { return _boost_patterns; }
+
+  inline vector<vector<graph_type>>& boost_patterns() {
+    return _boost_patterns;
+  }
 
   /* output mapping */
   void boost_writeMapping(const string& mapfile);
 
  private:
-  graph_type _boost_graph;                // boost graph
-  vector<vector<graph_type>> _boost_patterns;     // GEDs vector
-  vector<vector<map<long, long>>> _maps;  // (pattern id, graph id)
-
-  /* for GEDs consisting with unconnected patterns */
-  vector<bool> _connected;  // GED is connected?
-  vector<vector<map<long, long>>> _unconnected_maps;  // (mapping id, pattern id)
+  graph_type _boost_graph;                     // boost graph
+  vector<vector<graph_type>> _boost_patterns;  // GEDs vector
+  vector<vector<map<long, long>>> _maps;       // (pattern id, graph id)
 
 #endif
 
@@ -78,4 +77,8 @@ class CheckGED {
   Graph _graph;          // graph
   vector<GED> _geds;     // GEDs
   vector<bool> _active;  // real or fake
+
+  /* for GEDs consisting with unconnected patterns */
+  vector<bool> _connected;                            // GED is connected?
+  vector<vector<map<long, long>>> _unconnected_maps;  // (map id, pattern id)
 };

@@ -156,7 +156,7 @@ void CheckGED::reWriteGEDs(const string& path) {
 #ifdef BOOST_GRAPH
 
 void CheckGED::convert2BG() {
-  //convert graph
+  // convert graph
   Graph& g = _graph;
   vector<GED>& geds = _geds;
   // Add vertices...
@@ -195,9 +195,9 @@ void CheckGED::convert2BG() {
       }
     }
   }
-  //convert GEDs
+  // convert GEDs
   for (int i = 0; i < geds.size(); i++) {
-    if (_connected[i]) { //connected GED
+    if (_connected[i]) {  // connected GED
       // Create graph1
       graph_type pattern;
       // Add vertices...
@@ -216,16 +216,16 @@ void CheckGED::convert2BG() {
       vector<graph_type> pattern_v;
       pattern_v.emplace_back(pattern);
       _boost_patterns.emplace_back(pattern_v);
-    } else { //unconnected GED
+    } else {  // unconnected GED
       vector<map<long, long>>& map_v = _unconnected_maps[i];
       vector<graph_type> pattern_v;
-      for (auto& id_map:map_v) {
+      for (auto& id_map : map_v) {
         graph_type pattern;
         map<long, long> tmp_map;
         for (int pos = 0; pos < id_map.size(); pos++) {
           Node& n = geds[i].node(id_map[pos]);
-          tmp_map[n.v().id()] = (long) pos;
-          //cout << "ID: " << pos << "," << n.v().label() << "\n"; //test
+          tmp_map[n.v().id()] = (long)pos;
+          // cout << "ID: " << pos << "," << n.v().label() << "\n"; //test
           add_vertex(vertex_property(n.v().label()), pattern);
         }
         for (int pos = 0; pos < id_map.size(); pos++) {
@@ -233,8 +233,9 @@ void CheckGED::convert2BG() {
           vector<long>& eL = n.elabels();
           vector<long>& eN = n.neighbors();
           for (int i = 0; i < eL.size(); i++) {
-            //cout << "E: " << pos << "," << tmp_map[eN[i]] << "," << eL[i] << "\n"; //test
-            add_edge((long) pos, tmp_map[eN[i]], edge_property(eL[i]), pattern);
+            // cout << "E: " << pos << "," << tmp_map[eN[i]] << "," << eL[i] <<
+            // "\n"; //test
+            add_edge((long)pos, tmp_map[eN[i]], edge_property(eL[i]), pattern);
           }
         }
         pattern_v.emplace_back(pattern);
@@ -251,11 +252,12 @@ void CheckGED::boost_filter() {
     for (auto& node : nodes)
       if (node.neighbors().size() == 0 && !_geds[i].hasParent(node.v().id())) {
         _active[i] = false;
-        //cout << "F\n"; //test
+        // cout << "F\n"; //test
         break;
       }
   }
-  // Filter GED who has unconnected patterns consisting with more than 2 connected patterns.
+  // Filter GED who has unconnected patterns consisting with more than 2
+  // connected patterns.
   for (int i = 0; i < _unconnected_maps.size(); i++) {
     if (_unconnected_maps[i].size() > 2) {
       _active[i] = false;
@@ -282,7 +284,8 @@ void CheckGED::boost_vf2() {
             get(boost::edge_name, bp), get(boost::edge_name, _boost_graph));
         // Create callback
         my_call_back<graph_type, graph_type> callback(bp, _boost_graph);
-        // Print out all subgraph isomorphism mappings between graph1 and graph2.
+        // Print out all subgraph isomorphism mappings between graph1 and
+        // graph2.
         // Function vertex_order_by_mult is used to compute the order of
         // vertices of graph1. This is the order in which the vertices are
         // examined during the matching process.
@@ -315,12 +318,12 @@ void CheckGED::boost_vf2() {
           }
           int old_size = id_maps.size();
           int new_size = tmp_id_map.size();
-          //cout << old_size << "," << new_size << "\n"; //test
+          // cout << old_size << "," << new_size << "\n"; //test
           if (old_size != 0) {
             vector<map<long, long>> tmp = id_maps;
             // only store top "top_k"
             int top_k = 10000;
-            for (int k = 1; k < new_size && k*old_size < top_k; k++) {
+            for (int k = 1; k < new_size && k * old_size < top_k; k++) {
               id_maps.insert(id_maps.end(), tmp.begin(), tmp.end());
             }
             int old_cnt = 0;
@@ -328,7 +331,7 @@ void CheckGED::boost_vf2() {
             while (old_cnt < id_maps.size()) {
               for (int k = 0; k < old_size; k++, old_cnt++) {
                 map<long, long>& tmp = tmp_id_map[new_cnt];
-                for (auto& it:tmp) {
+                for (auto& it : tmp) {
                   id_maps[old_cnt][it.first] = it.second;
                 }
               }
@@ -340,10 +343,10 @@ void CheckGED::boost_vf2() {
         }
       }
       if (ged_bps[i].size() > 1) {
-        //remove homomorphism situation
+        // remove homomorphism situation
         for (auto it = id_maps.begin(); it != id_maps.end();) {
           set<long> id_set;
-          for (auto& m_it:(*it)) {
+          for (auto& m_it : (*it)) {
             id_set.emplace(m_it.second);
           }
           if (id_set.size() != (*it).size()) {
@@ -509,27 +512,27 @@ void CheckGED::classify() {
   for (int i = 0; i < _geds.size(); i++) {
     vector<Node>& nodes = _geds[i].pattern();
     set<long> all_ids;
-    for (auto& n:nodes) all_ids.emplace(n.v().id());
+    for (auto& n : nodes) all_ids.emplace(n.v().id());
     vector<map<long, long>> map_v;
     while (all_ids.size() != 0) {
       set<long> add_ids;
       add_ids.emplace(*(all_ids.begin()));
       auto iter = add_ids.begin();
-      while(iter != add_ids.end()) {
+      while (iter != add_ids.end()) {
         long id = *iter;
         vector<long>& neighbors = _geds[i].node(id).neighbors();
-        for (auto& nebor:neighbors) {
+        for (auto& nebor : neighbors) {
           add_ids.emplace(nebor);
         }
         set<long> parents;
         _geds[i].getParent(id, parents);
-        for (auto& par:parents) {
+        for (auto& par : parents) {
           add_ids.emplace(par);
         }
         iter++;
       }
-      if (add_ids.size() == nodes.size()) break; //connected pattern
-      //unconnected, separate pattern into many connected patterns
+      if (add_ids.size() == nodes.size()) break;  // connected pattern
+      // unconnected, separate pattern into many connected patterns
       map<long, long> id_map;
       int cnt = 0;
       for (auto iter = add_ids.begin(); iter != add_ids.end(); iter++) {
@@ -537,8 +540,7 @@ void CheckGED::classify() {
         id_map[cnt++] = id;
         all_ids.erase(id);
       }
-      map_v.emplace_back
-      (id_map);
+      map_v.emplace_back(id_map);
     }
 
     if (map_v.size() == 0) {
