@@ -10,7 +10,7 @@ cd build
 cmake -DBOOST_GRAPH=TRUE ..
 make
 
-for ((i=0; i<30; i++))
+for ((i=0; i<=30; i++))
 do
 
 GRAPH_FILE=$1          # graph file path

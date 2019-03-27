@@ -128,6 +128,35 @@ void CheckGED::loadGEDs(const string& gedpath) {
   }
 }
 
+void CheckGED::loadState(const string& stafile) {
+  string line;
+  int cnt = 0;
+  try {
+    ifstream fin(stafile);
+    while (getline(fin, line)) {
+      if (line == "The results:") {
+        while (getline(fin, line)) {
+          // cout << "LINE: " << line << "\n"; //test
+          vector<string> details;
+          boost::split(details, line, boost::is_any_of("\t"));
+          for (auto& d : details) {
+            if (d == "") continue;
+            // cout << d << "\n"; //test
+            _active[cnt++] = boost::lexical_cast<bool>(d);
+          }
+        }
+        break;
+      }
+    }
+  } catch (boost::bad_lexical_cast& e) {
+    cout << "GEDStateReadingError: " << e.what() << "\n";
+    exit(1);
+  } catch (std::exception& e) {
+    cout << e.what() << "\n";
+    exit(1);
+  }
+}
+
 void CheckGED::printGEDs() {
   cout << "Total:" << _geds.size() << "\n\n";
   for (auto& ged : _geds) {
@@ -154,6 +183,40 @@ void CheckGED::reWriteGEDs(const string& path) {
 }
 
 #ifdef BOOST_GRAPH
+
+void CheckGED::loadMapping(const string& mapfile) {
+  string line;
+  try {
+    ifstream fin(mapfile);
+    while (getline(fin, line)) {
+      if (line[0] == '#') {
+        vector<map<long, long>> map_v;
+        while (getline(fin, line)) {
+          if (line[0] == '$') break;
+          map<long, long> tmp;
+          vector<string> details;
+          boost::split(details, line, boost::is_any_of("\t"));
+          for (auto& d : details) {
+            if (d == "") continue;
+            d = d.substr(1, d.length() - 2);
+            vector<string> pair;
+            boost::split(pair, d, boost::is_any_of(","));
+            tmp[boost::lexical_cast<long>(pair[0])] =
+                boost::lexical_cast<long>(pair[1]);
+          }
+          map_v.emplace_back(tmp);
+        }
+        _maps.emplace_back(map_v);
+      }
+    }
+  } catch (boost::bad_lexical_cast& e) {
+    cout << "GEDMappingReadingError: " << e.what() << "\n";
+    exit(1);
+  } catch (std::exception& e) {
+    cout << e.what() << "\n";
+    exit(1);
+  }
+}
 
 void CheckGED::convert2BG() {
   // convert graph
@@ -401,17 +464,9 @@ void CheckGED::boost_validation() {
       }
     }
   }
-  cout << "\nThe results:\n";
-  for (int i = 0; i < _active.size(); i++) {
-    if (_active[i]) {
-      cout << "1\t";
-    } else {
-      cout << "0\t";
-    }
-    if ((i + 1) % 5 == 0) cout << "\n";
-  }
-  cout << "\n";
+  printRes();
 }
+
 #endif
 
 void CheckGED::validation() {
@@ -440,16 +495,7 @@ void CheckGED::validation() {
   }
   end = clock();
   cout << "Total cost: " << (double)(end - start) / CLOCKS_PER_SEC << " s\n";
-  cout << "\nThe results:\n";
-  for (int i = 0; i < _active.size(); i++) {
-    if (_active[i]) {
-      cout << "1\t";
-    } else {
-      cout << "0\t";
-    }
-    if ((i + 1) % 5 == 0) cout << "\n";
-  }
-  cout << "\n";
+  printRes();
 }
 
 void CheckGED::writeValidatedGEDs(const string& gedpath) {
@@ -570,6 +616,7 @@ int main(int argc, char** argv) {
     }
     filename = argv[2];
     gedpath = argv[3];
+    string resfile = gedpath + ".vali";
 
     CheckGED cg;
 
@@ -579,12 +626,12 @@ int main(int argc, char** argv) {
     cg.loadGEDs(gedpath);
     cg.printGEDs();
 
+    // judge GED is connected or unconnected
     cg.classify();
 
-#ifdef BOOST_GRAPH  // Graph's and GEDs' vertices must start from id 0 and
-                    // continous.
+#ifdef BOOST_GRAPH
+    /* Graph's and GEDs' vertices must start from id 0 and continous. */
     string mapfile = gedpath + ".map";
-    string resfile = gedpath + ".vali";
     // convert graph and geds to boost graph format
     cg.convert2BG();
     // filter unexpected GEDs
@@ -595,16 +642,13 @@ int main(int argc, char** argv) {
     cg.boost_writeMapping(mapfile);
     // validate literals
     cg.boost_validation();
-    // write results
-    cg.writeValidatedGEDs(resfile);
 #else
     // validate
     cg.validation();
-    // write file
-    string resfile = gedpath + ".vali";
-    cg.writeValidatedGEDs(resfile);
 #endif
 
+    // write results
+    cg.writeValidatedGEDs(resfile);
   } else if (mode == 2) {
     // cut GEDs ./checkGED 2 $GED_path NUM
     if (argc < 4) {
@@ -639,6 +683,27 @@ int main(int argc, char** argv) {
     repath = gedpath + ".remap";
     cg.reWriteGEDs(repath);
   }
+#ifdef BOOST_GRAPH
+  else if (mode == 4) {
+    // select right GEDs whose number of isomorphism match is more than k
+    if (argc < 4) {
+      cout << "Missing Parameters!" << endl;
+      exit(1);
+    }
+    gedpath = argv[2];
+    int k = atoi(argv[3]);
+    CheckGED cg;
+    cg.loadGEDs(gedpath);
+    const string stafile = gedpath + ".log";
+    cg.loadState(stafile);
+    const string mapfile = gedpath + ".map";
+    cg.loadMapping(mapfile);
+    // unactivate GED whose number of isomorphism is less than k
+    cg.filter_k(k);
+    const string resfile = gedpath + ".vali_m" + argv[3];
+    cg.writeValidatedGEDs(resfile);
+  }
+#endif
 
   return 0;
 }

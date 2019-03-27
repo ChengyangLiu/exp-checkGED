@@ -16,6 +16,8 @@ class CheckGED {
   void loadGraph(const string& filename) { _graph.loadGraph(filename); }
   /* load GEDs from file */
   void loadGEDs(const string& gedpath);
+  /* load GED state from file */
+  void loadState(const string& stafile);
 
   void printGraph() {
     string res = "";
@@ -48,6 +50,8 @@ class CheckGED {
    * So only support patterns without self-loops.
    */
 
+  /* load isomorphism mapping from file */
+  void loadMapping(const string& mapfile);
   /* convert GEDs and Graph into boost graph */
   void convert2BG();
   /* ignore patterns that do not match with given condition */
@@ -57,16 +61,31 @@ class CheckGED {
   /* validate the literals in GEDs */
   void boost_validation();
 
+  /* output mapping */
+  void boost_writeMapping(const string& mapfile);
+  /* unactivate GED whose number of isomorphism is less than k */
+  void filter_k(int k) {
+    for (int i = 0; i < _active.size(); i++)
+      if (_maps[i].size() < k) _active[i] = false;
+  }
+
   inline graph_type& boost_graph() { return _boost_graph; }
 
   inline vector<vector<graph_type>>& boost_patterns() {
     return _boost_patterns;
   }
 
-  /* output mapping */
-  void boost_writeMapping(const string& mapfile);
-
  private:
+  /* print the state of GEDs */
+  void printRes() {
+    string res = "\nThe results:\n";
+    for (int i = 0; i < _active.size(); i++) {
+      res += _active[i] ? "1\t" : "0\t";
+      if ((i + 1) % 5 == 0) res += "\n";
+    }
+    cout << res + "\n";
+  }
+
   graph_type _boost_graph;                     // boost graph
   vector<vector<graph_type>> _boost_patterns;  // GEDs vector
   vector<vector<map<long, long>>> _maps;       // (pattern id, graph id)
