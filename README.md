@@ -6,7 +6,7 @@ GED or GFD is a structure consisting with a graph pattern and a relation between
 
 #### Command
 
-```bash
+```JavaScript
 $./script/run.sh $GRAPH_FILE_PATH $GED_FILE_PATH
 ```
 Please use absolute path.
@@ -14,12 +14,12 @@ Please use absolute path.
 #### Preparations
 
 - *$GRAPH_FILE_PATH* contains vertex file and edge file. *g.v* and *g.e* are necessary in this path. e.g.
-```bash
+```JavaScript
 $GRAPH_FILE_PATH=~/data/g
 ```
 
 - *$GED_FILE_PATH* contains GED (or GFD) file. *g.ged* is necessary in this path. e.g.
-```bash
+```JavaScript
 $GED_FILE_PATH=~/data/g.ged
 ```
 
@@ -41,7 +41,7 @@ It produces *g.remap.v*, *g.remap.e*, *g.ged.remap*, *g.ged.remap.log*, *g.ged.r
 
 #### Command
 
-```bash
+```JavaScript
 $./script/select.sh $GED_FILE_PATH $K
 ```
 Please use absolute path.
@@ -49,12 +49,12 @@ Please use absolute path.
 #### Preparations
 
 - *$GED_FILE_PATH* contains GED (or GFD) file. Please use remap file. *g.ged.remap*, *g.ged.remap.log* and *g.ged.remap.map* are necessary in this path. e.g.
-```bash
+```JavaScript
 $GED_FILE_PATH=~/data/g.ged.remap
 ```
 
 - *$K* is an integer number, which means selecting right GEDs whose number of isomorphism matches is more than k. e.g.
-```bash
+```JavaScript
 $K=5
 ```
 
