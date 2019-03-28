@@ -173,7 +173,7 @@ void CheckGED::reWriteGEDs(const string& path) {
     for (auto& ged : _geds) {
       string str = "";
       ged.toString(str, true);
-      fout << str << "##############\n";
+      fout << "##############\n" << str;
     }
     fout.close();
   } catch (std::exception& e) {
@@ -312,12 +312,17 @@ void CheckGED::boost_filter() {
   for (int i = 0; i < _geds.size(); i++) {
     vector<Node>& nodes = _geds[i].pattern();
     // Filter independent node situation
-    for (auto& node : nodes)
+    for (auto& node : nodes) {
       if (node.neighbors().size() == 0 && !_geds[i].hasParent(node.v().id())) {
         _active[i] = false;
         // cout << "F\n"; //test
         break;
       }
+    }
+    // Filter GEDs with wrong literal format
+    if (_geds[i].hasFormatError()) {
+      _active[i] = false;
+    }
   }
   // Filter GED who has unconnected patterns consisting with more than 2
   // connected patterns.
@@ -450,19 +455,12 @@ void CheckGED::boost_writeMapping(const string& mapfile) {
 void CheckGED::boost_validation() {
   for (int i = 0; i < _geds.size(); i++) {
     cout << "Checking NO." << (i + 1) << " GED";
-    if (!_geds[i].checkLiteralFormat()) {
-      _active[i] = false;
-      cout << "\t-1\n";  // Literals are wrong format.
-    } else {
+    if (_active[i] = true) {
       if (!_geds[i].validateGED(_graph, _maps[i])) {
         _active[i] = false;
-        cout << "\t0\n";  // The GED is wrong.(maybe pattern or literals do not
-                          // exist or "X->Y" is not one and only in graph)
-      } else {
-        cout << "\t1\n";  // The GED is right.(pattern is right and "X->Y" is
-                          // unique)
       }
     }
+    cout << "\t" << _active[i] << "\n";
   }
   printRes();
 }
@@ -474,19 +472,13 @@ void CheckGED::validation() {
   tmp = start = clock();
   for (int i = 0; i < _geds.size(); i++) {
     cout << "Checking NO." << (i + 1) << " GED";
-    if (!_geds[i].checkLiteralFormat()) {
-      _active[i] = false;
-      cout << "\t-1\n";  // Literals are wrong format.
-    } else {
-      if (!_geds[i].validateGED(_graph)) {
+    if (_active[i] = true) {
+      if (!_geds[i].validateGED(_graph, _maps[i])) {
         _active[i] = false;
-        cout << "\t0\n";  // The GED is wrong.(maybe pattern or literals do not
-                          // exist or "X->Y" is not one and only in graph)
-      } else {
-        cout << "\t1\n";  // The GED is right.(pattern is right and "X->Y" is
-                          // unique)
       }
     }
+    cout << "\t" << _active[i] << "\n";
+
     if ((i + 1) % 200 == 0) {
       end = clock();
       cout << "Cost: " << (double)(end - tmp) / CLOCKS_PER_SEC << " s\n";
@@ -505,7 +497,7 @@ void CheckGED::writeValidatedGEDs(const string& gedpath) {
     if (_active[i]) {
       string res = "";
       _geds[i].toString(res, false);
-      fout << res << "##############\n";
+      fout << "##############\n" << res;
     }
   }
   fout.close();

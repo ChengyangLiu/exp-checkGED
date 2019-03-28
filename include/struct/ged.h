@@ -708,7 +708,7 @@ class GED {
 #endif
 
   /* check whether the format of literal is correct */
-  bool checkLiteralFormat() {
+  bool hasFormatError() {
     for (int i = 0; i < 2; i++) {
       vector<GED_TYPE>& types = (i == 0) ? _x_type : _y_type;
       map<long, string>::iterator it =
@@ -727,12 +727,12 @@ class GED {
         for (vector<long>::iterator vit = ids.begin(); vit != ids.end();
              vit++) {
           if (!nodeExist(*vit)) {
-            return false;
+            return true;
           }
         }
       }
     }
-    return true;
+    return false;
   }
 
   void toString(string& str, bool remap) {
