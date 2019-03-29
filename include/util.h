@@ -8,6 +8,15 @@ enum GED_TYPE {
   EQ_ID = 2,
 };
 
+/* check one number whether existing in a vector */
+template <typename T>
+bool const exist(const vector<T>& a, const T& b) {
+  for (auto it = a.begin(); it != a.end(); it++) {
+    if (*it == b) return true;
+  }
+  return false;
+}
+
 /* check whether 2 vector do not have intersection */
 template <typename T>
 bool const interEmpty(vector<T> const& a, vector<T> const& b) {

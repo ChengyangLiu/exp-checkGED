@@ -10,16 +10,13 @@ cd build
 cmake -DBOOST_GRAPH=TRUE ..
 make
 
-TYPE=".gfd"
-#TYPE=".ged"
-
-T_FILE=$1$TYPE".vali_m"$2
+T_FILE=$1".vali_m"$2
 T_FILE_TMP=$T_FILE".tmp"
 
 for ((i=0; i<=54; i++))
 do
 
-GED_FILE=$1$i$TYPE".remap"    # file path
+GED_FILE=$1$i".remap"    # file path
 
 RES_FILE=$GED_FILE".vali_m"$2
 

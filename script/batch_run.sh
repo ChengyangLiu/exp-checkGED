@@ -18,8 +18,7 @@ GRAPH_FILE=$1          # graph file path
 for ((i=0; i<=10; i++))
 do
 
-GED_FILE=$2$i".gfd"    # gfd file path
-#GED_FILE=$2$i".ged"    # ged file path
+GED_FILE=$2$i    # file path
 ########################################
 
 GRAPH_REMAP_FIEL=$GRAPH_FILE".remap"   # graph map

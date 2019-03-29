@@ -553,21 +553,29 @@ void CheckGED::classify() {
     for (auto& n : nodes) all_ids.emplace(n.v().id());
     vector<map<long, long>> map_v;
     while (all_ids.size() != 0) {
-      set<long> add_ids;
-      add_ids.emplace(*(all_ids.begin()));
-      auto iter = add_ids.begin();
-      while (iter != add_ids.end()) {
-        long id = *iter;
+      // cout << "T1\n"; //test
+      vector<long> add_ids;
+      add_ids.emplace_back(*(all_ids.begin()));
+      for (int j = 0; j < add_ids.size(); j++) {
+        long id = add_ids[j];
+        // cout << "Now: " << id << "\n"; //test
         vector<long>& neighbors = _geds[i].node(id).neighbors();
         for (auto& nebor : neighbors) {
-          add_ids.emplace(nebor);
+          // cout << "Ns: " << nebor << "\n"; //test
+          if (!exist(add_ids, nebor)) {
+            add_ids.emplace_back(nebor);
+            // cout << "Add\n"; //test
+          }
         }
         set<long> parents;
         _geds[i].getParent(id, parents);
         for (auto& par : parents) {
-          add_ids.emplace(par);
+          // cout << "Ps: " << par << "\n"; //test
+          if (!exist(add_ids, par)) {
+            add_ids.emplace_back(par);
+            // cout << "Add\n"; //test
+          }
         }
-        iter++;
       }
       if (add_ids.size() == nodes.size()) break;  // connected pattern
       // unconnected, separate pattern into many connected patterns
@@ -575,9 +583,11 @@ void CheckGED::classify() {
       int cnt = 0;
       for (auto iter = add_ids.begin(); iter != add_ids.end(); iter++) {
         long id = *iter;
+        // cout << id << "\t"; //test
         id_map[cnt++] = id;
         all_ids.erase(id);
       }
+      // cout << "\n"; //test
       map_v.emplace_back(id_map);
     }
 
