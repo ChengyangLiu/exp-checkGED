@@ -4,16 +4,16 @@ set -e
 ROOT=`git rev-parse --show-toplevel`
 
 cd $ROOT
-rm -rf ./build || true
-mkdir build
+#rm -rf ./build || true
+#mkdir build
 cd build
-cmake -DBOOST_GRAPH=TRUE ..
-make
+#cmake -DBOOST_GRAPH=TRUE ..
+#make
 
 T_FILE=$1".vali_m"$2
 T_FILE_TMP=$T_FILE".tmp"
 
-for ((i=0; i<=54; i++))
+for ((i=0; i<=10; i++))
 do
 
 GED_FILE=$1$i".remap"    # file path
