@@ -65,8 +65,15 @@ class CheckGED {
   void boost_writeMapping(const string& mapfile);
   /* unactivate GED whose number of isomorphism is less than k */
   void filter_k(int k) {
-    for (int i = 0; i < _active.size(); i++)
-      if (_maps[i].size() < k) _active[i] = false;
+    if (k >= 10) {
+      for (int i = 0; i < _active.size(); i++) {
+        if (_maps[i].size() < k) _active[i] = false;
+      }
+    } else {
+      for (int i = 0; i < _active.size(); i++) {
+        if (_maps[i].size() != k) _active[i] = false;
+      }
+    }
   }
 
   inline graph_type& boost_graph() { return _boost_graph; }
