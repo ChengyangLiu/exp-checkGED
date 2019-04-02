@@ -1,7 +1,6 @@
 import numpy as np
 
-ENDNUM = 10
-ADDR = '/home/naughtycat/data/dbpedia_label7/GFD/dbpedia_label7.gfd.vali_m'
+ADDR = '/home/naughtycat/data/dbpedia_label64/GFD/dbpedia_label64.gfd.remap'
 
 vsize = 10
 esize = 10
@@ -37,9 +36,9 @@ def same(i,j):
             sameflag = False
     return sameflag
 
-def reduceGFD(k):
-    GFDfile = open(ADDR + str(k), 'r')
-    rGFDfile = open(ADDR + str(k) + '.reduced', 'w')
+def reduceGFD():
+    GFDfile = open(ADDR, 'r')
+    rGFDfile = open(ADDR + '.reduced', 'w')
 
     num = 0
     while 1:
@@ -125,8 +124,7 @@ def reduceGFD(k):
     rGFDfile.close()
 
 def main():
-    for i in range(ENDNUM):
-        reduceGFD(i + 1)
+    reduceGFD()
 
 if __name__ == '__main__':
     main()

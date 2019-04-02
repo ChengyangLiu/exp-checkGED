@@ -16,7 +16,7 @@ T_FILE_TMP=$T_FILE".tmp"
 for ((i=0; i<=10; i++))
 do
 
-GED_FILE=$1$i".remap"    # file path
+GED_FILE=$1$i    # file path
 
 RES_FILE=$GED_FILE".vali_m"$2
 

@@ -13,16 +13,9 @@ make
 GRAPH_FILE=$1      # graph file path
 GED_FILE=$2        # ged file path
 
-GRAPH_REMAP_FIEL=$GRAPH_FILE".remap"   # graph map
-GED_REMAP_FIEL=$GED_FILE".remap"       # ged map
-GED_LOG=$GED_REMAP_FIEL".log"          # geds' literals check log
+GED_LOG=$GED_FILE".log"          # geds' literals check log
 
-REMAP="./exp-checkGED 3 $GRAPH_FILE $GED_FILE"
-BOOST_VF2="nohup ./exp-checkGED 1 $GRAPH_REMAP_FIEL $GED_REMAP_FIEL >$GED_LOG 2>&1 &"
-
-echo "  Begin remap Graph file and GEDs file..."
-echo $REMAP
-eval $REMAP
+BOOST_VF2="nohup ./exp-checkGED 1 $GRAPH_FILE $GED_FILE >$GED_LOG 2>&1 &"
 
 echo "  Running validation for GEDs..."
 echo $BOOST_VF2

@@ -64,16 +64,26 @@ void CheckGED::loadGEDs(const string& gedpath) {
           // which only has one key-value.
           if (isX) {
             if (details.size() == 4) {
-              _geds[cnt - 1].addX_let(boost::lexical_cast<long>(details[1]),
-                                      details[3]);
+              if (details[2] == "name") {
+                _geds[cnt - 1].addX_let(boost::lexical_cast<long>(details[1]),
+                                        details[3]);
+              } else {
+                _geds[cnt - 1].addX_let(boost::lexical_cast<long>(details[2]),
+                                        details[3]);
+              }
             } else {
               _geds[cnt - 1].addX_let(boost::lexical_cast<long>(details[1]),
                                       details[2]);
             }
           } else {
             if (details.size() == 4) {
-              _geds[cnt - 1].addY_let(boost::lexical_cast<long>(details[1]),
-                                      details[3]);
+              if (details[2] == "name") {
+                _geds[cnt - 1].addY_let(boost::lexical_cast<long>(details[1]),
+                                        details[3]);
+              } else {
+                _geds[cnt - 1].addY_let(boost::lexical_cast<long>(details[2]),
+                                        details[3]);
+              }
             } else {
               _geds[cnt - 1].addY_let(boost::lexical_cast<long>(details[1]),
                                       details[2]);

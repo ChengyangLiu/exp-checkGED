@@ -738,7 +738,9 @@ class GED {
   void toString(string& str, bool remap) {
     str = str + "%GID:" + gid() + "\n";
     str = str + "%LID#" + lid() + "\n";
+    str = str + "#Pattern" + "\n";
     patternString(str, remap);
+    str = str + "#Condition" + "\n";
     literalString(str, remap);
   }
 
