@@ -10,7 +10,7 @@ cd build
 #cmake -DBOOST_GRAPH=TRUE ..
 #make
 
-GED_FILE=$1    # file path
+GED_FILE=$1".remap.reduced"    # file path
 T_FILE=$1".vali_m"$2
 RES_FILE=$GED_FILE".vali_m"$2
 

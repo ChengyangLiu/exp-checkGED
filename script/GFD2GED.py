@@ -11,10 +11,10 @@ line4 = "#Condition" + '\n'
 line5 = "%X" + '\n'
 line6 = "%Y" + '\n'
 
-l = 64
+l = 15
 ENDNUM = 10
-ADDR = '/home/naughtycat/data/dbpedia_label' + str(l) + '/GFD/dbpedia_label' + str(l)
-OUTADDR = '/home/naughtycat/data/dbpedia_label' + str(l) + '/GED/dbpedia_label' + str(l)
+ADDR = '/home/naughtycat/data/dbpedia_label' + str(l) + '/GFD/dbpedia_label' + str(l) + '.gfd.vali_m'
+OUTADDR = '/home/naughtycat/data/dbpedia_label' + str(l) + '/GED/dbpedia_label' + str(l) + '.ged.m'
 
 def same(a, vnum):
     flag = 0
@@ -121,11 +121,9 @@ def writelit():
         GEDfile.write(Y[l])
 
 for k in range(ENDNUM):
-    GFDfile = open(ADDR + '.gfd.vali_m' + str(k + 1) + '.reduced', 'r')
-    GEDfile = open(OUTADDR + '.ged.m' + str(k + 1), 'w')
+    GFDfile = open(ADDR + str(k + 1), 'r')
+    GEDfile = open(OUTADDR + str(k + 1), 'w')
 
-    #GFDfile = open(ADDR + '.gfd.vali_m' + str(k + 1), 'r')
-    #GEDfile = open(OUTADDR + '.ged.m' + str(k + 1), 'w')
 
     while 1:
         line = GFDfile.readline()
