@@ -44,10 +44,13 @@ void CheckGED::loadGEDs(const string& gedpath) {
         }
         // cout << "SRC:" << src << ",LABEL:" << label << ",DST:" << dst <<
         //"\n"; //test
-        if (!_geds[cnt - 1].addE(src, boost::lexical_cast<long>(label), dst)) {
-          cout << "GED V ID does not exist, in GED " << cnt << " in File "
-               << gedpath << "\n";
-          exit(1);
+        // if the label of edge is empty, ignore it.
+        if (label != "") {
+          if (!_geds[cnt - 1].addE(src, boost::lexical_cast<long>(label), dst)) {
+            cout << "GED V ID does not exist, in GED " << cnt << " in File "
+                 << gedpath << "\n";
+            exit(1);
+          }
         }
         // cout << "OK\n"; //test
       } else if (line[0] == '%' && line[1] == 'X') {  // X?
