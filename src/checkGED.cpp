@@ -635,30 +635,39 @@ int main(int argc, char** argv) {
 
     CheckGED cg;
 
+    cout << "load graph ..." << endl;
     cg.loadGraph(filename);
-    cg.printGraph();
+    //cg.printGraph();
 
+    cout << "load GED ..." << endl;
     cg.loadGEDs(gedpath);
-    cg.printGEDs();
+    //cg.printGEDs();
 
     // judge GED is connected or unconnected
+    cout << "classify ..." << endl;
     cg.classify();
 
 #ifdef BOOST_GRAPH
     /* Graph's and GEDs' vertices must start from id 0 and continous. */
     string mapfile = gedpath + ".map";
     // convert graph and geds to boost graph format
+    cout << "convert to Boost Graph ..." << endl;
     cg.convert2BG();
     // filter unexpected GEDs
+    cout << "filter ..." << endl;
     cg.boost_filter();
     // use boost vf2 to produce mapping from GEDs to Graph
+    cout << "vf2 ..." << endl;
     cg.boost_vf2();
     // write mapping from GEDs to Graph
+    cout << "write mapping ..." << endl;
     cg.boost_writeMapping(mapfile);
     // validate literals
+    cout << "validate GED ..." << endl;
     cg.boost_validation();
 #else
     // validate
+    cout << "validate GED ..." << endl;
     cg.validation();
 #endif
 

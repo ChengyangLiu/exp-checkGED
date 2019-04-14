@@ -31,6 +31,7 @@ class Graph {
         Node node(v);
         _nodes.emplace_back(node);
         _vid_map[src] = cnt++;
+        if (cnt % 100000 == 0) cout << "vertex " << cnt << "\n";
       }
       ifstream fin_e(filename + ".e");
       // read its neighbors in
@@ -51,6 +52,7 @@ class Graph {
         }
         Node& node = Graph::node(src);
         node.addNeighbor(dst, label);
+        if (line_cnt % 100000 == 0) cout << "edge" << line_cnt << "\n";
       }
     } catch (exception& e) {
       cout << e.what();
