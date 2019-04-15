@@ -31,8 +31,12 @@ class Graph {
         Node node(v);
         _nodes.emplace_back(node);
         _vid_map[src] = cnt++;
-        if (cnt % 100000 == 0) cout << "vertex " << cnt << "\n";
+        if (cnt % 100000 == 0) {
+          LOG::info("loading vertex: " + boost::lexical_cast<string>(cnt));
+        }
       }
+      LOG::info("loading vertex total: " +
+                boost::lexical_cast<string>(cnt));
       ifstream fin_e(filename + ".e");
       // read its neighbors in
       int line_cnt = 0;
@@ -41,21 +45,29 @@ class Graph {
         ss >> src >> label >> dst;
         line_cnt++;
         if (!Graph::nodeExist(src)) {
-          cout << "Vertex ID: " << src << " does not exist, Line " << line_cnt
-               << " in File " << filename << ".e\n";
+          LOG::error("Vertex ID: " + boost::lexical_cast<string>(src) +
+                     " does not exist, Line " +
+                     boost::lexical_cast<string>(line_cnt) + " in File " +
+                     boost::lexical_cast<string>(filename) + ".e");
           exit(1);
         }
         if (!Graph::nodeExist(dst)) {
-          cout << "Vertex ID: " << dst << " does not exist, Line " << line_cnt
-               << " in File " << filename << ".e\n";
+          LOG::error("Vertex ID: " + boost::lexical_cast<string>(dst) +
+                     " does not exist, Line " +
+                     boost::lexical_cast<string>(line_cnt) + " in File " +
+                     boost::lexical_cast<string>(filename) + ".e");
           exit(1);
         }
         Node& node = Graph::node(src);
         node.addNeighbor(dst, label);
-        if (line_cnt % 100000 == 0) cout << "edge" << line_cnt << "\n";
+        if (line_cnt % 100000 == 0) {
+          LOG::info("loading edge: " + boost::lexical_cast<string>(line_cnt));
+        }
       }
+      LOG::info("loading edge total: " +
+                boost::lexical_cast<string>(line_cnt));
     } catch (exception& e) {
-      cout << e.what();
+      LOG::error(e.what());
       exit(1);
     }
   }
@@ -83,7 +95,7 @@ class Graph {
         }
       }
     } catch (boost::bad_lexical_cast& e) {
-      cout << e.what() << endl;
+      LOG::error(e.what());
       exit(1);
     }
   }
@@ -113,7 +125,7 @@ class Graph {
       }
       feout.close();
     } catch (std::exception& e) {
-      cout << e.what() << endl;
+      LOG::error(e.what());
       exit(1);
     }
   }

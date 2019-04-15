@@ -25,7 +25,9 @@ void CheckGED::loadGEDs(const string& gedpath) {
         GED ged(gid, lid);
         _geds.emplace_back(ged);
         _active.emplace_back(true);
-        ++cnt;
+        if (++cnt % 1000 == 0) {
+          LOG::info("loading GED: " + boost::lexical_cast<string>(cnt));
+        }
       } else if (line[0] == 'v') {  // read v
         stringstream ss(line);
         long id, label;
@@ -46,9 +48,11 @@ void CheckGED::loadGEDs(const string& gedpath) {
         //"\n"; //test
         // if the label of edge is empty, ignore it.
         if (label != "") {
-          if (!_geds[cnt - 1].addE(src, boost::lexical_cast<long>(label), dst)) {
-            cout << "GED V ID does not exist, in GED " << cnt << " in File "
-                 << gedpath << "\n";
+          if (!_geds[cnt - 1].addE(src, boost::lexical_cast<long>(label),
+                                   dst)) {
+            LOG::error("GED V ID does not exist, in GED " +
+                       boost::lexical_cast<string>(cnt) + " in File " +
+                       gedpath);
             exit(1);
           }
         }
@@ -132,8 +136,10 @@ void CheckGED::loadGEDs(const string& gedpath) {
         }
       }
     }
+    LOG::info("loading GED total: " + boost::lexical_cast<string>(cnt));
   } catch (boost::bad_lexical_cast& e) {
-    cout << "GEDReadingError in GED NO." << cnt << ": " << e.what() << "\n";
+    LOG::error("GEDReadingError in GED NO." + boost::lexical_cast<string>(cnt) +
+               ": " + e.what());
     exit(1);
   } catch (std::exception& e) {
     cout << e.what() << "\n";
@@ -162,20 +168,20 @@ void CheckGED::loadState(const string& stafile) {
       }
     }
   } catch (boost::bad_lexical_cast& e) {
-    cout << "GEDStateReadingError: " << e.what() << "\n";
+    LOG::error("GEDStateReadingError");
     exit(1);
   } catch (std::exception& e) {
-    cout << e.what() << "\n";
+    LOG::error(e.what());
     exit(1);
   }
 }
 
 void CheckGED::printGEDs() {
-  cout << "Total:" << _geds.size() << "\n\n";
+  LOG::test("Total", _geds.size());
   for (auto& ged : _geds) {
     string str = "";
     ged.toString(str, false);
-    cout << str << "\n";
+    LOG::test(str);
   }
 }
 
@@ -190,7 +196,7 @@ void CheckGED::reWriteGEDs(const string& path) {
     }
     fout.close();
   } catch (std::exception& e) {
-    std::cout << e.what() << std::endl;
+    LOG::error(e.what());
     exit(1);
   }
 }
@@ -223,10 +229,10 @@ void CheckGED::loadMapping(const string& mapfile) {
       }
     }
   } catch (boost::bad_lexical_cast& e) {
-    cout << "GEDMappingReadingError: " << e.what() << "\n";
+    LOG::error("GEDMappingReadingError");
     exit(1);
   } catch (std::exception& e) {
-    cout << e.what() << "\n";
+    LOG::error(e.what());
     exit(1);
   }
 }
@@ -351,7 +357,7 @@ void CheckGED::boost_vf2() {
   for (int i = 0; i < ged_bps.size(); i++) {
     vector<map<long, long>> id_maps;
     map<int, int> pos_map;
-    cout << "vf2 on No." << i + 1 << " GED\n";
+    LOG::info("vf2 on No." + boost::lexical_cast<string>(i + 1) + " GED");
     if (_active[i] != false) {  // ignore filtered patterns
       // only support connected GED
       // and unconnected GED cosisting with 2 connected pattern
@@ -460,20 +466,20 @@ void CheckGED::boost_writeMapping(const string& mapfile) {
     }
     fout.close();
   } catch (std::exception& e) {
-    cout << e.what() << endl;
+    LOG::error(e.what());
     exit(1);
   }
 }
 
 void CheckGED::boost_validation() {
   for (int i = 0; i < _geds.size(); i++) {
-    cout << "Checking NO." << (i + 1) << " GED";
     if (_active[i] = true) {
       if (!_geds[i].validateGED(_graph, _maps[i])) {
         _active[i] = false;
       }
     }
-    cout << "\t" << _active[i] << "\n";
+    LOG::info("Checking NO." + boost::lexical_cast<string>(i + 1) + " GED",
+              (int)_active[i]);
   }
   printRes();
 }
@@ -484,22 +490,26 @@ void CheckGED::validation() {
   clock_t start, end, tmp;
   tmp = start = clock();
   for (int i = 0; i < _geds.size(); i++) {
-    cout << "Checking NO." << (i + 1) << " GED";
     if (_active[i] = true) {
       if (!_geds[i].validateGED(_graph, _maps[i])) {
         _active[i] = false;
       }
     }
-    cout << "\t" << _active[i] << "\n";
+    LOG::info("Checking NO." + boost::lexical_cast<string>(i + 1) + " GED",
+              (int)_active[i]);
 
     if ((i + 1) % 200 == 0) {
       end = clock();
-      cout << "Cost: " << (double)(end - tmp) / CLOCKS_PER_SEC << " s\n";
+      LOG::info("Cost: " + boost::lexical_cast<string>((double)(end - tmp) /
+                                                       CLOCKS_PER_SEC) +
+                "s");
       tmp = end;
     }
   }
   end = clock();
-  cout << "Total cost: " << (double)(end - start) / CLOCKS_PER_SEC << " s\n";
+  LOG::info("Total cost: " + boost::lexical_cast<string>((double)(end - start) /
+                                                         CLOCKS_PER_SEC) +
+            "s");
   printRes();
 }
 
@@ -554,7 +564,7 @@ void CheckGED::delivery(const string& gedpath, int frag_num) {
       fout.close();
     }
   } catch (std::exception& e) {
-    cout << e.what();
+    LOG::error(e.what());
     exit(1);
   }
 }
@@ -619,14 +629,14 @@ int main(int argc, char** argv) {
   string filename = "";
   string gedpath = "";
   if (argc < 2) {
-    cout << "Missing Parameters!" << endl;
+    LOG::error("Missing Parameters!");
     exit(1);
   }
   mode = atoi(argv[1]);
   if (mode == 1) {
     // validate GEDs  ./checkGED 1 $Graph_file $GED_path
     if (argc < 4) {
-      cout << "Missing Parameters!" << endl;
+      LOG::error("Missing Parameters!");
       exit(1);
     }
     filename = argv[2];
@@ -635,59 +645,72 @@ int main(int argc, char** argv) {
 
     CheckGED cg;
 
-    cout << "load graph ..." << endl;
+    LOG::system("Start Loading Graph");
     cg.loadGraph(filename);
-    //cg.printGraph();
+    LOG::system("Completed");
+    // cg.printGraph();
 
-    cout << "load GED ..." << endl;
+    LOG::system("Start Loading GED");
     cg.loadGEDs(gedpath);
-    //cg.printGEDs();
+    LOG::system("Completed");
+    // cg.printGEDs();
 
     // judge GED is connected or unconnected
-    cout << "classify ..." << endl;
+    LOG::system("Start Classifing GED");
     cg.classify();
+    LOG::system("Completed");
 
 #ifdef BOOST_GRAPH
     /* Graph's and GEDs' vertices must start from id 0 and continous. */
     string mapfile = gedpath + ".map";
     // convert graph and geds to boost graph format
-    cout << "convert to Boost Graph ..." << endl;
+    LOG::system("Start Converting To Boost Graph");
     cg.convert2BG();
+    LOG::system("Completed");
     // filter unexpected GEDs
-    cout << "filter ..." << endl;
+    LOG::system("Start Filtering Unexpected GED");
     cg.boost_filter();
+    LOG::system("Completed");
     // use boost vf2 to produce mapping from GEDs to Graph
-    cout << "vf2 ..." << endl;
+    LOG::system("Running VF2");
     cg.boost_vf2();
+    LOG::system("Completed");
     // write mapping from GEDs to Graph
-    cout << "write mapping ..." << endl;
+    LOG::system("Start Writing Mapping");
     cg.boost_writeMapping(mapfile);
+    LOG::system("Completed");
     // validate literals
-    cout << "validate GED ..." << endl;
+    LOG::system("Start Validating GED");
     cg.boost_validation();
+    LOG::system("Completed");
 #else
     // validate
-    cout << "validate GED ..." << endl;
+    LOG::system("Start Validate GED");
     cg.validation();
+    LOG::system("Completed");
 #endif
 
     // write results
+    LOG::system("Start Writing Results");
     cg.writeValidatedGEDs(resfile);
+    LOG::system("Completed");
   } else if (mode == 2) {
     // cut GEDs ./checkGED 2 $GED_path NUM
     if (argc < 4) {
-      cout << "Missing Parameters!" << endl;
+      LOG::error("Missing Parameters!");
       exit(1);
     }
     gedpath = argv[2];
 
     int frag_num = atoi(argv[3]);
     CheckGED cg;
+    LOG::system("Start Separating GED");
     cg.delivery(gedpath, frag_num);
+    LOG::system("Completed");
   } else if (mode == 3) {
     // rewrite Graph and GEDs ./checkGED 3 $Graph_file $GEDs_path
     if (argc < 4) {
-      cout << "Missing Parameters!" << endl;
+      LOG::error("Missing Parameters!");
       exit(1);
     }
     filename = argv[2];
@@ -695,37 +718,56 @@ int main(int argc, char** argv) {
 
     CheckGED cg;
     Graph& g = cg.graph();
+    LOG::system("Start Loading Graph");
     cg.loadGraph(filename);
+    LOG::system("Completed");
     // cg.printGraph();
     // rewrite graph, make vertices start from id 0 and continous.
     string repath = filename + ".remap";
+    LOG::system("Start Rewriting Graph");
     g.rewriteGraph(repath);
+    LOG::system("Completed");
 
+    LOG::system("Start Loading GED");
     cg.loadGEDs(gedpath);
+    LOG::system("Completed");
     // cg.printGEDs();
     // rewrite GEDs, make vertices start from id 0 and continous.
     repath = gedpath + ".remap";
+    LOG::system("Start Rewriting GED");
     cg.reWriteGEDs(repath);
+    LOG::system("Completed");
   }
 #ifdef BOOST_GRAPH
   else if (mode == 4) {
     // select right GEDs whose number of isomorphism match is more than k
     if (argc < 4) {
-      cout << "Missing Parameters!" << endl;
+      LOG::error("Missing Parameters!");
       exit(1);
     }
     gedpath = argv[2];
-    int k = atoi(argv[3]);
+    const string k_str = argv[3];
+    const int k = atoi(argv[3]);
     CheckGED cg;
+    LOG::system("Start Loading GED");
     cg.loadGEDs(gedpath);
+    LOG::system("Completed");
     const string stafile = gedpath + ".log";
+    LOG::system("Start Loading GED State");
     cg.loadState(stafile);
+    LOG::system("Completed");
     const string mapfile = gedpath + ".map";
+    LOG::system("Start Loading GED Mapping");
     cg.loadMapping(mapfile);
+    LOG::system("Completed");
     // unactivate GED whose number of isomorphism is less than k
+    LOG::system("Start Selecting Top " + k_str + " GED");
     cg.filter_k(k);
+    LOG::system("Completed");
     const string resfile = gedpath + ".vali_m" + argv[3];
+    LOG::system("Start Writing Results");
     cg.writeValidatedGEDs(resfile);
+    LOG::system("Completed");
   }
 #endif
 

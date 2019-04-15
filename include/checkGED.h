@@ -22,7 +22,7 @@ class CheckGED {
   void printGraph() {
     string res = "";
     _graph.graphString(res);
-    cout << res;
+    LOG::test(res);
   }
   void printGEDs();
 
@@ -90,7 +90,7 @@ class CheckGED {
       res += _active[i] ? "1\t" : "0\t";
       if ((i + 1) % 5 == 0) res += "\n";
     }
-    cout << res + "\n";
+    LOG::test(res);
   }
 
   graph_type _boost_graph;                     // boost graph

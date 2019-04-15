@@ -120,7 +120,7 @@ class GED {
         }
       }
     } catch (boost::bad_lexical_cast& e) {
-      cout << "PatternStringError: " << e.what() << "\n";
+      LOG::error("PatternStringError");
       exit(1);
     }
   }
@@ -209,7 +209,7 @@ class GED {
         }
       }
     } catch (boost::bad_lexical_cast& e) {
-      cout << "LiteralStringError: " << e.what() << "\n";
+      LOG::error("LiteralStringError");
       exit(1);
     }
   }

@@ -8,6 +8,14 @@ enum GED_TYPE {
   EQ_ID = 2,
 };
 
+enum LOG_TYPE {
+  SYSTEM = 0,
+  INFO = 1,
+  TEST = 2,
+  WARNING = 3,
+  ERROR = 4,
+};
+
 /* check one number whether existing in a vector */
 template <typename T>
 bool const exist(const vector<T>& a, const T& b) {
@@ -30,6 +38,37 @@ bool const interEmpty(vector<T> const& a, vector<T> const& b) {
 bool pairComp(const pair<long, long>& a, const pair<long, long>& b) {
   return a.first < b.first;
 }
+
+class LOG {
+ public:
+  LOG() {}
+  ~LOG() {}
+
+  static void system(string str) { cout << "[SYSM]~ " << str << std::endl; }
+  static void system(string str, int id) {
+    cout << "[SYSM]~ " << str << ":" << id << std::endl;
+  }
+
+  static void info(string str) { cout << "[INFO]- " << str << std::endl; }
+  static void info(string str, int id) {
+    cout << "[INFO]- " << str << ":" << id << std::endl;
+  }
+
+  static void test(string str) { cout << "[TEST]* " << str << std::endl; }
+  static void test(string str, int id) {
+    cout << "[TEST]* " << str << ":" << id << std::endl;
+  }
+
+  static void warning(string str) { cout << "[WARN]! " << str << std::endl; }
+  static void warning(string str, int id) {
+    cout << "[WARN]! " << str << ":" << id << std::endl;
+  }
+
+  static void error(string str) { cout << "[EROR]x " << str << std::endl; }
+  static void error(string str, int id) {
+    cout << "[EROR]x " << str << ":" << id << std::endl;
+  }
+};
 
 #ifdef BOOST_GRAPH
 

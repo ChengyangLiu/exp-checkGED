@@ -87,7 +87,9 @@ def writevar(v, e, num, pre, post):
     GEDfile.write(line4)
     GEDfile.write(line5)
     for k in range(Xnum):
-        GEDfile.write(X[k])
+        if int(X[k][1]) > num:
+            X[k][1] = str(int(X[k][1]) + 1)
+        GEDfile.writelines([X[k][0], '\t', X[k][1], '\t', 'name', '\t', X[k][2]])
     GEDfile.write(line6)
     GEDfile.writelines(['eq-id', '\t', str(v[num][0]), '\t', str(v[num+1][0]), '\n'])
     return
@@ -101,7 +103,7 @@ def writeids(numnum):
     GEDfile.write(line4)
     GEDfile.write(line5)
     for k in range(Xnum):
-        GEDfile.write(X[k])
+        GEDfile.writelines([X[k][0], '\t', X[k][1], '\t', 'name', '\t', X[k][2]])
     GEDfile.write(line6)
     GEDfile.writelines(['eq-id', '\t', '0', '\t', 'id', '\t', str(numnum - 1), '\t', 'id', '\n'])
     return
@@ -138,7 +140,7 @@ for k in range(ENDNUM):
                 e = np.zeros((esize, 3), dtype=list)
                 eline = np.zeros(esize*2, dtype=list)
                 enum = 0
-                X = np.zeros(Xsize, dtype=list)
+                X = np.zeros((Xsize,3), dtype=list)
                 Xnum = 0
                 Y = np.zeros(Ysize, dtype=list)
                 Ynum = 0
@@ -185,7 +187,9 @@ for k in range(ENDNUM):
             elif spline[0][1] == 'q':
                 if flag:
                     #X[Xnum] = spline[0] + '\t' + spline[2] + '\t' + 'name' + '\t' + spline[3]
-                    X[Xnum] = spline[0] + '\t' + spline[1] + '\t' + 'name' + '\t' + spline[2]
+                    X[Xnum][0] = spline[0]
+                    X[Xnum][1] = spline[1]
+                    X[Xnum][2] = spline[2]
                     Xnum = Xnum + 1
                 else:
                     child = np.zeros(enum, dtype=str)
@@ -200,12 +204,6 @@ for k in range(ENDNUM):
                         e[enum][2] = e[0][2]
                         eline[enum] = 'e' + '\t' + str(vnum) + '\t' + e[0][1] + '\t' + e[0][2]
                         enum = enum + 1
-                        if vnum == 4:
-                            e[enum][0] = vnum
-                            e[enum][1] = e[1][1]
-                            e[enum][2] = e[2][2]
-                            eline[enum] = 'e' + '\t' + str(vnum) + '\t' + e[1][1] + '\t' + e[1][2]
-                            enum = enum + 1
                         v[vnum][0] = vnum
                         v[vnum][1] = v[0][1]
                         v[vnum][2] = v[0][2]
