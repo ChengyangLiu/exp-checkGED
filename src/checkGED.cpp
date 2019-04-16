@@ -155,6 +155,7 @@ void CheckGED::loadState(const string& stafile) {
     while (getline(fin, line)) {
       if (line == "The results:") {
         while (getline(fin, line)) {
+          if (line[0] == '[') break;
           // cout << "LINE: " << line << "\n"; //test
           vector<string> details;
           boost::split(details, line, boost::is_any_of("\t"));
