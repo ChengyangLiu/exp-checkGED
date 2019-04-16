@@ -1,4 +1,11 @@
 #!/bin/bash
+################################################################################
+# Use: rewrite graph and GEDs, make vertices start from id 0 and continous.
+# Author: Liucy
+# Date: 4.16,2019
+# Input: $graph file path; $GED file path
+# Output: .remap files
+################################################################################
 set -e
 
 ROOT=`git rev-parse --show-toplevel`

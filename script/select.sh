@@ -1,4 +1,11 @@
 #!/bin/bash
+################################################################################
+# Use: select right GEDs whose number of isomorphism matches is more than k
+# Author: Liucy
+# Date: 4.16,2019
+# Input: $GED file path; $K
+# Output: result file
+################################################################################
 set -e
 
 ROOT=`git rev-parse --show-toplevel`

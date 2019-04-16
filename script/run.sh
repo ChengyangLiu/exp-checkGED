@@ -1,4 +1,11 @@
 #!/bin/bash
+################################################################################
+# Use: check whether GEDs(or GFDs) are correct.
+# Author: Liucy
+# Date: 4.16,2019
+# Input: $graph file path; $GED file path
+# Output: result file "*.vali"; mapping file "*.map"; log file "*.log"
+################################################################################
 set -e
 
 ROOT=`git rev-parse --show-toplevel`

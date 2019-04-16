@@ -1,12 +1,14 @@
 import numpy as np
 
-ADDR = '/home/naughtycat/data/dbpedia_label64/GFD/dbpedia_label64.gfd.remap'
+# reduce GFD by filtering GFDs with the same pattern. 
+
+ADDR = '/home/naughtycat/data/yago_label11/GFD/yago_label11.gfd.remap'
 
 vsize = 10
 esize = 10
 Xsize = 5
 Ysize = 1
-maxnum = 100000
+maxnum = 1000000
 
 v = np.zeros((maxnum, vsize, 3), dtype=list)
 vline = np.zeros((maxnum, vsize), dtype=list)

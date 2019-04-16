@@ -4,7 +4,10 @@
 
 using namespace std;
 
-/* node of a graph, that's an encapsulation for vertex */
+/* Class: node of a graph, that's an encapsulation for vertex
+ * Author: Liucy
+ * Date: 4,2019
+ */
 class Node {
  public:
   Node() {}

@@ -9,7 +9,10 @@
 
 using namespace std;
 
-/* class graph */
+/* Class: Graph
+ * Author: Liucy
+ * Date: 4,2019
+ */
 class Graph {
  public:
   Graph() {}
@@ -31,12 +34,11 @@ class Graph {
         Node node(v);
         _nodes.emplace_back(node);
         _vid_map[src] = cnt++;
-        if (cnt % 100000 == 0) {
-          LOG::info("loading vertex: " + boost::lexical_cast<string>(cnt));
+        if (cnt % 10000 == 0) {
+          LOG::info("loading vertex", cnt);
         }
       }
-      LOG::info("loading vertex total: " +
-                boost::lexical_cast<string>(cnt));
+      LOG::info("loading vertex total", cnt);
       ifstream fin_e(filename + ".e");
       // read its neighbors in
       int line_cnt = 0;
@@ -60,12 +62,11 @@ class Graph {
         }
         Node& node = Graph::node(src);
         node.addNeighbor(dst, label);
-        if (line_cnt % 100000 == 0) {
-          LOG::info("loading edge: " + boost::lexical_cast<string>(line_cnt));
+        if (line_cnt % 10000 == 0) {
+          LOG::info("loading edge", line_cnt);
         }
       }
-      LOG::info("loading edge total: " +
-                boost::lexical_cast<string>(line_cnt));
+      LOG::info("loading edge total", line_cnt);
     } catch (exception& e) {
       LOG::error(e.what());
       exit(1);

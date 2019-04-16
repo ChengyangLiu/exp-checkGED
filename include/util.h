@@ -2,6 +2,11 @@
 
 using namespace std;
 
+/* Util for common use
+ * Author: Liucy
+ * Date: 4,2019
+ */
+
 enum GED_TYPE {
   EQ_LET = 0,
   EQ_VAR = 1,
@@ -44,29 +49,29 @@ class LOG {
   LOG() {}
   ~LOG() {}
 
-  static void system(string str) { cout << "[SYSM]~ " << str << std::endl; }
+  static void system(string str) { cout << "[CORE]~ " << str << std::endl; }
   static void system(string str, int id) {
-    cout << "[SYSM]~ " << str << ":" << id << std::endl;
+    cout << "[CORE]~ " << str << ": " << id << std::endl;
   }
 
   static void info(string str) { cout << "[INFO]- " << str << std::endl; }
   static void info(string str, int id) {
-    cout << "[INFO]- " << str << ":" << id << std::endl;
+    cout << "[INFO]- " << str << ": " << id << std::endl;
   }
 
   static void test(string str) { cout << "[TEST]* " << str << std::endl; }
   static void test(string str, int id) {
-    cout << "[TEST]* " << str << ":" << id << std::endl;
+    cout << "[TEST]* " << str << ": " << id << std::endl;
   }
 
   static void warning(string str) { cout << "[WARN]! " << str << std::endl; }
   static void warning(string str, int id) {
-    cout << "[WARN]! " << str << ":" << id << std::endl;
+    cout << "[WARN]! " << str << ": " << id << std::endl;
   }
 
   static void error(string str) { cout << "[EROR]x " << str << std::endl; }
   static void error(string str, int id) {
-    cout << "[EROR]x " << str << ":" << id << std::endl;
+    cout << "[EROR]x " << str << ": " << id << std::endl;
   }
 };
 

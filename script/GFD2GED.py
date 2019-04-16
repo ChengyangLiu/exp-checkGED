@@ -1,5 +1,7 @@
 import numpy as np
 
+# produce GED from GFD
+
 vsize = 5
 esize = 4
 Xsize = 5
@@ -11,10 +13,10 @@ line4 = "#Condition" + '\n'
 line5 = "%X" + '\n'
 line6 = "%Y" + '\n'
 
-l = 15
+l = 11
 ENDNUM = 10
-ADDR = '/home/naughtycat/data/dbpedia_label' + str(l) + '/GFD/dbpedia_label' + str(l) + '.gfd.vali_m'
-OUTADDR = '/home/naughtycat/data/dbpedia_label' + str(l) + '/GED/dbpedia_label' + str(l) + '.ged.m'
+ADDR = '/home/naughtycat/data/yago_label' + str(l) + '/GFD/yago_label' + str(l) + '.gfd.vali_m'
+OUTADDR = '/home/naughtycat/data/yago_label' + str(l) + '/GED/yago_label' + str(l) + '.ged.m'
 
 def same(a, vnum):
     flag = 0

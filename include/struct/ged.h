@@ -8,6 +8,11 @@
 
 using namespace std;
 
+/* Class: GED or GFD is a structure consisting with a graph pattern and a
+ * relation between X and Y, which is X->Y, each of them is a set of literals.
+ * Author: Liucy
+ * Date: 4,2019
+ */
 class GED {
  public:
   GED() {}

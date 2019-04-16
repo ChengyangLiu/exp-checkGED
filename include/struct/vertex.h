@@ -2,7 +2,10 @@
 
 using namespace std;
 
-/* vertex of a graph */
+/* Class: vertex of a graph
+ * Author: Liucy
+ * Date: 4,2019
+ */
 class Vertex {
  public:
   Vertex() {}

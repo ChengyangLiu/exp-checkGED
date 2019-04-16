@@ -298,8 +298,8 @@ void CheckGED::convert2BG() {
       vector<graph_type> pattern_v;
       pattern_v.emplace_back(pattern);
       _boost_patterns.emplace_back(pattern_v);
-    } else {  // unconnected GED
-      vector<map<long, long>>& map_v = _unconnected_maps[i];
+    } else {  // disconnected GED
+      vector<map<long, long>>& map_v = _disconnected_maps[i];
       vector<graph_type> pattern_v;
       for (auto& id_map : map_v) {
         graph_type pattern;
@@ -328,12 +328,16 @@ void CheckGED::convert2BG() {
 }
 
 void CheckGED::boost_filter() {
+  int indep = 0;
+  int wrong_l = 0;
+  int wrong_un = 0;
   for (int i = 0; i < _geds.size(); i++) {
     vector<Node>& nodes = _geds[i].pattern();
     // Filter independent node situation
     for (auto& node : nodes) {
       if (node.neighbors().size() == 0 && !_geds[i].hasParent(node.v().id())) {
         _active[i] = false;
+        indep++;
         // cout << "F\n"; //test
         break;
       }
@@ -341,15 +345,20 @@ void CheckGED::boost_filter() {
     // Filter GEDs with wrong literal format
     if (_geds[i].hasFormatError()) {
       _active[i] = false;
+      wrong_l++;
     }
   }
-  // Filter GED who has unconnected patterns consisting with more than 2
+  // Filter GED who has disconnected patterns consisting with more than 2
   // connected patterns.
-  for (int i = 0; i < _unconnected_maps.size(); i++) {
-    if (_unconnected_maps[i].size() > 2) {
+  for (int i = 0; i < _disconnected_maps.size(); i++) {
+    if (_disconnected_maps[i].size() > 2) {
       _active[i] = false;
+      wrong_un++;
     }
   }
+  LOG::info("independent node", indep);
+  LOG::info("wrong literal", wrong_l);
+  LOG::info("unexpected disconnection", wrong_un);
 }
 
 void CheckGED::boost_vf2() {
@@ -360,7 +369,7 @@ void CheckGED::boost_vf2() {
     LOG::info("vf2 on No." + boost::lexical_cast<string>(i + 1) + " GED");
     if (_active[i] != false) {  // ignore filtered patterns
       // only support connected GED
-      // and unconnected GED cosisting with 2 connected pattern
+      // and disconnected GED cosisting with 2 connected pattern
       for (int j = 0; j < ged_bps[i].size() && j < 2; j++) {
         graph_type& bp = ged_bps[i][j];
         // Create the vertex binary predicate
@@ -393,8 +402,8 @@ void CheckGED::boost_vf2() {
             id_maps.emplace_back(id_map);
           }
         } else {
-          // pattern is unconnected
-          map<long, long>& tmp_map = _unconnected_maps[i][j];
+          // pattern is disconnected
+          map<long, long>& tmp_map = _disconnected_maps[i][j];
           vector<map<long, long>> tmp_id_map;
           for (auto& set_of_v : set_of_vertex_iso_map) {
             map<long, long> id_map;
@@ -570,6 +579,7 @@ void CheckGED::delivery(const string& gedpath, int frag_num) {
 }
 
 void CheckGED::classify() {
+  int disconnected = 0;
   for (int i = 0; i < _geds.size(); i++) {
     vector<Node>& nodes = _geds[i].pattern();
     set<long> all_ids;
@@ -601,7 +611,7 @@ void CheckGED::classify() {
         }
       }
       if (add_ids.size() == nodes.size()) break;  // connected pattern
-      // unconnected, separate pattern into many connected patterns
+      // disconnected, separate pattern into many connected patterns
       map<long, long> id_map;
       int cnt = 0;
       for (auto iter = add_ids.begin(); iter != add_ids.end(); iter++) {
@@ -618,9 +628,12 @@ void CheckGED::classify() {
       _connected.emplace_back(true);
     } else {
       _connected.emplace_back(false);
+      disconnected++;
     }
-    _unconnected_maps.emplace_back(map_v);
+    _disconnected_maps.emplace_back(map_v);
   }
+  LOG::info("connected", _geds.size() - disconnected);
+  LOG::info("disconnected", disconnected);
 }
 
 int main(int argc, char** argv) {
@@ -655,8 +668,8 @@ int main(int argc, char** argv) {
     LOG::system("Completed");
     // cg.printGEDs();
 
-    // judge GED is connected or unconnected
-    LOG::system("Start Classifing GED");
+    // judge GED is connected or disconnected
+    LOG::system("Start Classifying GED");
     cg.classify();
     LOG::system("Completed");
 

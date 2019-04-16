@@ -1,4 +1,11 @@
 #!/bin/bash
+################################################################################
+# Use: check whether GEDs(or GFDs) are correct. (batch run)
+# Author: Liucy
+# Date: 4.16,2019
+# Input: $graph file path; $GED file path
+# Output: result file "*.vali"; mapping file "*.map"; log file "*.log"
+################################################################################
 set -e
 
 ROOT=`git rev-parse --show-toplevel`
@@ -12,14 +19,14 @@ make
 
 GRAPH_FILE=$1          # graph file path
 
-########################################
-# Modify parameters to fit your case.  #
-########################################
-for ((i=1; i<=10; i++))
+################################################################################
+# Modify parameters to fit your case.
+################################################################################
+for ((i=0; i<=5; i++))
 do
 
 GED_FILE=$2$i    # file path
-########################################
+################################################################################
 
 GED_LOG=$GED_FILE".log"          # geds' literals check log
 

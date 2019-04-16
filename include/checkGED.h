@@ -4,6 +4,10 @@
 
 using namespace std;
 
+/* Class: exp-checkGED is a tool to validate GEDs or GFDs
+ * Author: Liucy
+ * Date: 4,2019
+ */
 class CheckGED {
  public:
   CheckGED() {}
@@ -36,7 +40,7 @@ class CheckGED {
   /* separate the GEDs into many parts */
   void delivery(const string& gedpath, int frag_num);
 
-  /* classify GEDs, connected or unconnected */
+  /* classify GEDs, connected or disconnected */
   void classify();
 
 #ifdef BOOST_GRAPH
@@ -104,7 +108,7 @@ class CheckGED {
   vector<GED> _geds;     // GEDs
   vector<bool> _active;  // real or fake
 
-  /* for GEDs consisting with unconnected patterns */
+  /* for GEDs consisting with disconnected patterns */
   vector<bool> _connected;                            // GED is connected?
-  vector<vector<map<long, long>>> _unconnected_maps;  // (map id, pattern id)
+  vector<vector<map<long, long>>> _disconnected_maps;  // (map id, pattern id)
 };
