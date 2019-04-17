@@ -331,6 +331,7 @@ void CheckGED::convert2BG() {
 void CheckGED::boost_filter() {
   int indep = 0;
   int wrong_l = 0;
+  int same = 0;
   int wrong_un = 0;
   for (int i = 0; i < _geds.size(); i++) {
     vector<Node>& nodes = _geds[i].pattern();
@@ -348,6 +349,12 @@ void CheckGED::boost_filter() {
       _active[i] = false;
       wrong_l++;
     }
+    // Filter GEDs with edges which have the same state (src and dst have same
+    // vlabel, all edges have same elabel)
+    if (_geds[i].hasSameLabel(_graph.allNodes())) {
+      _active[i] = false;
+      same++;
+    }
   }
   // Filter GED who has disconnected patterns consisting with more than 2
   // connected patterns.
@@ -359,6 +366,7 @@ void CheckGED::boost_filter() {
   }
   LOG::info("independent node", indep);
   LOG::info("wrong literal", wrong_l);
+  LOG::info("same label (used for big graph with little label type)", same);
   LOG::info("unexpected disconnection", wrong_un);
 }
 

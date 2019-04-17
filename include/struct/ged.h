@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <set>
@@ -738,6 +739,52 @@ class GED {
       }
     }
     return false;
+  }
+
+  // check whether GED's pattern has same label
+  // in each edge and number is over 2
+  bool hasSameLabel(vector<Node>& g_nodes) {
+    long src = 0;
+    long dst = 0;
+    long src_label = 0;
+    long dst_label = 0;
+    long elabel = 0;
+    bool flag = true;
+    long num = 0;
+    for (auto& node : _nodes) {
+      vector<long>& neighbors = node.neighbors();
+      vector<long>& elabels = node.elabels();
+      for (int i = 0; i < neighbors.size(); i++) {
+        num++;
+        if (flag) {
+          flag = false;
+          src = node.v().id();
+          src_label = node.v().label();
+          dst = neighbors[i];
+          dst_label = GED::node(dst).v().label();
+          elabel = elabels[i];
+        } else {
+          if (src_label != node.v().label() ||
+              dst_label != GED::node(dst).v().label() || elabel != elabels[i]) {
+            return false;
+          }
+        }
+      }
+    }
+    if (num < 3) return false;
+    // if the number of candidates is too much, filter it
+    long can_num = 0;
+    for (auto& node : g_nodes) {
+      vector<long>& neighbors = node.neighbors();
+      vector<long>& elabels = node.elabels();
+      for (int i = 0; i < neighbors.size(); i++) {
+        if (src_label == node.v().label() &&
+            dst_label == GED::node(dst).v().label() && elabel == elabels[i]) {
+          can_num++;
+        }
+      }
+    }
+    return pow((double)can_num, (double)num) > 25 * 25 * 25 ? true : false;
   }
 
   void toString(string& str, bool remap) {
