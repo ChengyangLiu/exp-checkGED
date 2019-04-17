@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: kysxd/boost-cpp-python-cmake-container
+
+    working_directory: ~/exp-checkGED
+
+    steps:
+      - checkout
+
+      - run: mkdir build && cd build && cmake -DBOOST_GRAPH=TRUE .. && make
+      - run: cd script && ./remap.sh ~/exp-checkGED/data/g ~/exp-checkGED/data/g.gfd
+      - run: cd script && ./run.sh ~/exp-checkGED/data/g.remap ~/exp-checkGED/data/g.gfd.remap
+
+workflows:
+  version: 2
+  checkGED:
+    jobs:
+      - build
