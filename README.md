@@ -1,8 +1,13 @@
-# What's exp-checkGED
+# exp-checkGED
+
+[![CircleCI](https://circleci.com/gh/ChengyangLiu/exp-checkGED.svg?style=svg)](https://circleci.com/gh/ChengyangLiu/exp-checkGED)
+[![Release](https://img.shields.io/github/release/ChengyangLiu/exp-checkGED.svg)](https://github.com/ChengyangLiu/exp-checkGED/releases)
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-red.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
+
 exp-checkGED is a tool to validate GEDs or GFDs.
 GED or GFD is a structure consisting with a graph pattern and a relation between X and Y, which is X->Y, each of them is a set of literals.
 
-# Remap graph and GEDs
+## Remap graph and GEDs
 Remap graphs and GEDs (or GFDs) because **continous** vertices with ids starting from **zero** are necessary.
 
 ### Command:
@@ -32,7 +37,7 @@ It produces *g.remap.v*, *g.remap.e*, *g.ged.remap*.
 
 - *g.ged.remap*: mappings of original GEDs, whose ids are started frome 0 and continous.
 
-# Validate GEDs
+## Validate GEDs
 Check whether GEDs(or GFDs) are correct mainly using graph isomorphism algorithm **vf2**.
 
 ### Command:
