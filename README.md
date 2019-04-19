@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/ChengyangLiu/exp-checkGED.svg?style=svg)](https://circleci.com/gh/ChengyangLiu/exp-checkGED)
 [![Release](https://img.shields.io/github/release/ChengyangLiu/exp-checkGED.svg)](https://github.com/ChengyangLiu/exp-checkGED/releases)
-[![LICENSE](https://img.shields.io/badge/license-Anti%20996-red.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
 exp-checkGED is a tool to validate GEDs or GFDs.
 GED or GFD is a structure consisting with a graph pattern and a relation between X and Y, which is X->Y, each of them is a set of literals.
