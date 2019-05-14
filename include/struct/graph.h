@@ -29,8 +29,11 @@ class Graph {
       // read vertex in
       while (getline(fin_v, line)) {
         stringstream ss(line);
-        ss >> src >> label >> value;
-        Vertex v(src, label, value);
+        vector<string> details;
+        boost::split(details, line, boost::is_any_of("\t"));
+        src = atol(details[0].c_str());
+        label = atol(details[1].c_str());
+        Vertex v(src, label, details[2]);
         Node node(v);
         _nodes.emplace_back(node);
         _vid_map[src] = cnt++;

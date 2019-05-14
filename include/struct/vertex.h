@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <stdlib.h>
+
 using namespace std;
 
 /* Class: vertex of a graph
