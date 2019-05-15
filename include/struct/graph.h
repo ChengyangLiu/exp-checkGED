@@ -74,6 +74,11 @@ class Graph {
       LOG::error(e.what());
       exit(1);
     }
+
+    // sort vertex's edge
+    for (int i = 0; i < _nodes.size(); i++) {
+      _nodes[i].sortEdge();
+    }
   }
 
   /* print the graph */

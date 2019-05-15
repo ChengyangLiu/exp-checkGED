@@ -1,3 +1,4 @@
+#include <cstring>
 #include <iostream>
 
 using namespace std;
@@ -129,19 +130,19 @@ struct EdgeProperties {
 struct VertexProperties {
   VertexProperties() {}
   VertexProperties(long label) : _label(label), _is_cmp_val(false) {}
-  VertexProperties(long label, string& value)
+  VertexProperties(long label, char* value)
       : _label(label), _value(value), _is_cmp_val(false) {}
-  VertexProperties(long label, string& value, bool flag)
+  VertexProperties(long label, char* value, bool flag)
       : _label(label), _value(value), _is_cmp_val(flag) {}
 
   bool operator==(VertexProperties const& other) const {
     return (_is_cmp_val == true || other._is_cmp_val == true)
-               ? (_label == other._label && _value == other._value)
+               ? (_label == other._label && strcmp(_value, other._value) == 0)
                : (_label == other._label);
   }
 
   long _label;
-  string _value;
+  char* _value;
   bool _is_cmp_val;
 };
 

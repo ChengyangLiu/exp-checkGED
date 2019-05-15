@@ -106,6 +106,18 @@ class Node {
     }
   }
 
+  void sortEdge() {
+    multimap<long, long> tmp;
+    for (int i = 0; i < _neighbors.size(); i++) {
+      tmp.insert(make_pair(_neighbors[i], _elabels[i]));
+    }
+    int pos = 0;
+    for (auto it = tmp.begin(); it != tmp.end(); it++) {
+      _neighbors[pos] = it->first;
+      _elabels[pos++] = it->second;
+    }
+  }
+
  private:
   Vertex _vertex;           // source
   vector<long> _neighbors;  // destinations

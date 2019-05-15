@@ -46,6 +46,8 @@ class CheckGED {
 #ifdef BOOST_GRAPH
   /* CAUTION: the graph's and GEDs' id must start from 0 and be continous!
    * Support multi-elabels but only one vlabel.
+   * Support vertex's value.
+   * The edges must be sorted, so please use remap graph to do VF2.
    * /*BUG: Maybe boost vf2 bug. self-loops leads to wrong match.
    * For example: P1:0(a)-{b}->1(a),0(a)-{c}->0(a) can be matched in
    * G:0(a)-{b}->1(a),0(a)-{c}->0(a),0(a)-{b}->2(a);
@@ -109,6 +111,6 @@ class CheckGED {
   vector<bool> _active;  // real or fake
 
   /* for GEDs consisting with disconnected patterns */
-  vector<bool> _connected;                            // GED is connected?
+  vector<bool> _connected;                             // GED is connected?
   vector<vector<map<long, long>>> _disconnected_maps;  // (map id, pattern id)
 };

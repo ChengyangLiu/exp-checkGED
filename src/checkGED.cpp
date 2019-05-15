@@ -238,6 +238,17 @@ void CheckGED::loadMapping(const string& mapfile) {
   }
 }
 
+/* CAUTION: the graph's and GEDs' id must start from 0 and be continous!
+ * Support multi-elabels but only one vlabel.
+ * Support vertex's value.
+ * The edges must be sorted, so please use remap graph to do VF2.
+ * /*BUG: Maybe boost vf2 bug. self-loops leads to wrong match.
+ * For example: P1:0(a)-{b}->1(a),0(a)-{c}->0(a) can be matched in
+ * G:0(a)-{b}->1(a),0(a)-{c}->0(a),0(a)-{b}->2(a);
+ * but P2:0(a)-{b}->1(a) can not be matched in G.
+ * FixBug: Filter big graph's self-loops and then do pattern matching.
+ * So only support patterns without self-loops.
+ */
 void CheckGED::convert2BG(bool with_v_val) {
   // convert graph
   Graph& g = _graph;
@@ -246,7 +257,8 @@ void CheckGED::convert2BG(bool with_v_val) {
   vector<Node>& nodes = g.allNodes();
   if (with_v_val) {
     for (auto& n : nodes) {  // start from id 0
-      add_vertex(vertex_property({n.v().label(), n.v().value()}), _boost_graph);
+      add_vertex(vertex_property({n.v().label(), &(n.v().value()[0u])}),
+                 _boost_graph);
     }
   } else {
     for (auto& n : nodes) {  // start from id 0
@@ -303,8 +315,9 @@ void CheckGED::convert2BG(bool with_v_val) {
           for (auto& n : nodes) {
             iter = xliteral.find(n.v().id());
             if (iter != xliteral.end()) {  // add v's value to do vf2
-              add_vertex(vertex_property({n.v().label(), iter->second, true}),
-                         pattern);
+              add_vertex(
+                  vertex_property({n.v().label(), &(iter->second[0u]), true}),
+                  pattern);
             } else {
               add_vertex(vertex_property(n.v().label()), pattern);
             }
@@ -356,6 +369,8 @@ void CheckGED::convert2BG(bool with_v_val) {
 }
 
 void CheckGED::boost_filter() {
+  // These filter rules can be ignored as expected.
+  // Add or remove what you want.
   int indep = 0;
   int wrong_l = 0;
   int same = 0;
@@ -391,10 +406,35 @@ void CheckGED::boost_filter() {
       wrong_un++;
     }
   }
+
   LOG::info("independent node", indep);
   LOG::info("wrong literal", wrong_l);
   LOG::info("same label (used for big graph with little label type)", same);
   LOG::info("unexpected disconnection", wrong_un);
+
+  // For large graph: filter GED whose X's eq-let is not parent node
+  int not_parent = 0;
+  for (int i = 0; i < _geds.size(); i++) {
+    vector<GED_TYPE>& xtype = _geds[i].xtype();
+    if (xtype.size() != 0 && xtype[0] == EQ_LET) {
+      bool flag = false;
+      map<long, string>& xliteral = _geds[i].xmatches();
+      for (auto it = xliteral.begin(); it != xliteral.end(); it++) {
+        if (_geds[i].node(it->first).neighbors().size() != 0) {
+          flag = true;
+          break;
+        }
+      }
+      if (flag == false) {
+        _active[i] = false;
+        not_parent++;
+      }
+    } /*else {
+      _active[i] = false;
+      not_parent++;
+    }*/
+  }
+  LOG::info("vertex with X eq-let is not parent", not_parent);
 }
 
 void CheckGED::boost_vf2() {
