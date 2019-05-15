@@ -57,7 +57,7 @@ class CheckGED {
   /* load isomorphism mapping from file */
   void loadMapping(const string& mapfile);
   /* convert GEDs and Graph into boost graph */
-  void convert2BG();
+  void convert2BG(bool v_with_value);
   /* ignore patterns that do not match with given condition */
   void boost_filter();
   /* use boost_vf2_isomorphism to produce mapping from patterns to graph */

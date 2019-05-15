@@ -125,8 +125,28 @@ struct EdgeProperties {
   Labels _elabels;
 };
 
+// VertexProperties
+struct VertexProperties {
+  VertexProperties() {}
+  VertexProperties(long label) : _label(label), _is_cmp_val(false) {}
+  VertexProperties(long label, string& value)
+      : _label(label), _value(value), _is_cmp_val(false) {}
+  VertexProperties(long label, string& value, bool flag)
+      : _label(label), _value(value), _is_cmp_val(flag) {}
+
+  bool operator==(VertexProperties const& other) const {
+    return (_is_cmp_val == true || other._is_cmp_val == true)
+               ? (_label == other._label && _value == other._value)
+               : (_label == other._label);
+  }
+
+  long _label;
+  string _value;
+  bool _is_cmp_val;
+};
+
 typedef boost::property<boost::edge_name_t, EdgeProperties> edge_property;
-typedef boost::property<boost::vertex_name_t, long> vertex_property;
+typedef boost::property<boost::vertex_name_t, VertexProperties> vertex_property;
 
 // Using a vecS graphs => the index maps are implicit.
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,

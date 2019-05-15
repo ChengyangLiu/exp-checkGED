@@ -18,7 +18,7 @@ class Vertex {
 
   inline long id() { return _id; }
   inline long label() { return _label; }
-  inline const std::string& value() { return _value; }
+  inline std::string& value() { return _value; }
 
  private:
   long _id;            // vertex id

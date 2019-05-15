@@ -238,14 +238,20 @@ void CheckGED::loadMapping(const string& mapfile) {
   }
 }
 
-void CheckGED::convert2BG() {
+void CheckGED::convert2BG(bool with_v_val) {
   // convert graph
   Graph& g = _graph;
   vector<GED>& geds = _geds;
   // Add vertices...
   vector<Node>& nodes = g.allNodes();
-  for (auto& n : nodes) {  // start from id 0
-    add_vertex(vertex_property(n.v().label()), _boost_graph);
+  if (with_v_val) {
+    for (auto& n : nodes) {  // start from id 0
+      add_vertex(vertex_property({n.v().label(), n.v().value()}), _boost_graph);
+    }
+  } else {
+    for (auto& n : nodes) {  // start from id 0
+      add_vertex(vertex_property(n.v().label()), _boost_graph);
+    }
   }
   //... and edges
   for (auto& n : nodes) {
@@ -285,8 +291,29 @@ void CheckGED::convert2BG() {
       graph_type pattern;
       // Add vertices...
       vector<Node>& nodes = geds[i].pattern();
-      for (auto& n : nodes) {  // start from id 0
-        add_vertex(vertex_property(n.v().label()), pattern);
+      if (with_v_val) {
+        vector<GED_TYPE>& xtype = geds[i].xtype();
+        if (xtype.size() == 0 || xtype[0] != EQ_LET) {
+          for (auto& n : nodes) {
+            add_vertex(vertex_property(n.v().label()), pattern);
+          }
+        } else {
+          map<long, string>& xliteral = geds[i].xmatches();
+          map<long, string>::iterator iter;
+          for (auto& n : nodes) {
+            iter = xliteral.find(n.v().id());
+            if (iter != xliteral.end()) {  // add v's value to do vf2
+              add_vertex(vertex_property({n.v().label(), iter->second, true}),
+                         pattern);
+            } else {
+              add_vertex(vertex_property(n.v().label()), pattern);
+            }
+          }
+        }
+      } else {
+        for (auto& n : nodes) {  // start from id 0
+          add_vertex(vertex_property(n.v().label()), pattern);
+        }
       }
       //... and edges
       for (auto& n : nodes) {
@@ -687,7 +714,7 @@ int main(int argc, char** argv) {
     string mapfile = gedpath + ".map";
     // convert graph and geds to boost graph format
     LOG::system("Start Converting To Boost Graph");
-    cg.convert2BG();
+    cg.convert2BG(true);
     LOG::system("Completed");
     // filter unexpected GEDs
     LOG::system("Start Filtering Unexpected GED");
