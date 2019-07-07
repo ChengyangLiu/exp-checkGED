@@ -6,7 +6,7 @@
 
 exp-checkGED is a tool to validate GEDs or GFDs.
 GED or GFD is a structure consisting with a graph pattern and a relation between X and Y, which is X->Y, each of them is a set of literals.
-Note: While graph isomorphism is NP-hard, the efficiency of validation in large graph with high repetition rate of label is costly. 
+Note: While graph isomorphism is NP-Complete, the efficiency of validation in large graph with high repetition rate of label is costly. 
 ## Remap graph and GEDs
 Remap graphs and GEDs (or GFDs) because **continous** vertices with ids starting from **zero** are necessary.
 
